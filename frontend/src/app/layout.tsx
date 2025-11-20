@@ -6,6 +6,9 @@ import Provider from "../../components/Hoc/Provider";
 import Footer from "../../components/Home/Footer/Footer";
 import ScrollToTop from "../../components/Helper/ScrollToTop";
 
+// ✅ Add this import
+import AuthProvider from "../context/AuthContext";
+
 const font = Roboto({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
   subsets: ['latin']
@@ -26,12 +29,17 @@ export default function RootLayout({
       <body
         suppressHydrationWarning={true}
         className={`${font.className} antialiased`}>
-        <Provider>
-          <ResponsiveNav />
-          {children}
-          <Footer/>
-          <ScrollToTop/>
-        </Provider>
+
+        {/* ✅ Wrap everything with AuthProvider */}
+        <AuthProvider>
+          <Provider>
+            <ResponsiveNav />
+            {children}
+            <Footer />
+            <ScrollToTop />
+          </Provider>
+        </AuthProvider>
+
       </body>
     </html>
   );

@@ -96,7 +96,8 @@ const Nav = ({ openNav }: Props) => {
 
                         {/* ---- POPUP ---- */}
                         {showPopupSmall && (
-                            <div className="absolute top-full right-0 mt-2 z-[20000]">
+                            <div 
+                            className="absolute top-full right-0 mt-2 z-[20000]">
                                 <div
                                     onClick={(e) => e.stopPropagation()}
                                     className="relative bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-[350px]"
@@ -154,7 +155,7 @@ const Nav = ({ openNav }: Props) => {
                     </div>
                 )}
 
-                {/* POPUP LỚN LOGIN */}
+                {/* POPUP LOGIN */}
                 {showPopupLarge && (
                     <div
                         className="fixed inset-0 bg-black/50 flex items-center justify-center z-[30000]"
@@ -176,7 +177,7 @@ const Nav = ({ openNav }: Props) => {
 
                             {/* Google */}
                             <div className="mb-6 gap-3">
-                                <button className="w-full border rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-gray-100">
+                                <button className="w-full border rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 ">
                                     <Image src="/images/gg.png" width={22} height={22} alt="Google" />
                                     <span>with Google account</span>
                                 </button>
@@ -275,10 +276,10 @@ const Nav = ({ openNav }: Props) => {
 
                             <h2 className="text-3xl font-semibold mb-8 text-center">Register as a member!</h2>
 
-                            {/* Social Login */}
-                            <div className="grid grid-cols-2 gap-4 mb-8">
-                               
-                                <button className="border py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100">
+                            {/* Google Login */}
+                            <div className="grid gap-4 mb-8">
+
+                                <button className="w-full border rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700">
                                     <Image src="/images/gg.png" width={22} height={22} alt="Google" />
                                     <span>with Google account</span>
                                 </button>
@@ -332,7 +333,7 @@ const Nav = ({ openNav }: Props) => {
                                 <div className="relative mt-1">
                                     <input
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Từ 6 đến 50 ký tự, 1 chữ hoa, 1 số."
+                                        placeholder="6 to 50 characters, 1 uppercase letter, 1 number."
                                         className="w-full border rounded-lg px-4 py-2 outline-none focus:border-blue-500 pr-12"
                                     />
 
@@ -369,7 +370,7 @@ const Nav = ({ openNav }: Props) => {
 
                             {/* Login link */}
                             <div className="mt-6 text-center text-sm">
-                               You are a member of JobNest?
+                                You are a member of JobNest?
                                 <span
                                     className="text-blue-600 cursor-pointer ml-1"
                                     onClick={() => {
