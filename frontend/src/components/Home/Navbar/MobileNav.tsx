@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLinks } from '../../../constant/constant'
+import { NavLinks } from '../../../../constant/constant'
 import Link from 'next/link'
 import { CgClose } from 'react-icons/cg'
 
