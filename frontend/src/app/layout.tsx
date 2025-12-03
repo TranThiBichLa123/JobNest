@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
+
 import ResponsiveNav from "../components/Home/Navbar/ResponsiveNav";
 import Provider from "../components/Hoc/Provider";
 import Footer from "../components/Home/Footer/Footer";
 import ScrollToTop from "../components/Helper/ScrollToTop";
-
 import { GoogleOAuthProvider } from "@react-oauth/google";   // ✅ Thêm
 import AuthProvider from "../context/AuthContext";            // Bạn đã có
 
@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning={true} className={`${font.className} antialiased`}>
 
         {/* 🟦 BỌC TOÀN BỘ APP TRONG Google Provider */}
-        <GoogleOAuthProvider clientId="798075741546-raai0oeb4qd919nsrgvjmksber9o62go.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId="737701980832-9ustssqhaf802gjd4e31h2jsukml88kv.apps.googleusercontent.com">
 
           {/* 🟩 Bên trong là AuthProvider + UI */}
           <AuthProvider>
@@ -37,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ScrollToTop />
             </Provider>
           </AuthProvider>
+
 
         </GoogleOAuthProvider>
 
