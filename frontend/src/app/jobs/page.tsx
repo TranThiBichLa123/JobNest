@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { FiChevronsRight, FiChevronsLeft, FiChevronDown } from "react-icons/fi";
 import api from "@/lib/axios";
+import JobSearchBar from "@/components/Home/Hero/JobSearchBar";
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
@@ -10,6 +12,9 @@ export default function JobsPage() {
 
   // Search
   const [search, setSearch] = useState("");
+  const [locationSearch, setLocationSearch] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Filters (simple version)
   const [typeFilter, setTypeFilter] = useState("");
@@ -21,7 +26,12 @@ export default function JobsPage() {
 
   useEffect(() => {
     loadJobs();
-  }, []);
+    // If there are query params (from the Hero search), populate local search inputs
+    const titleQ = searchParams?.get("title") ?? "";
+    const locationQ = searchParams?.get("location") ?? "";
+    if (titleQ) setSearch(titleQ);
+    if (locationQ) setLocationSearch(locationQ);
+  }, [searchParams]);
 
   const loadJobs = async () => {
     try {
@@ -37,13 +47,19 @@ export default function JobsPage() {
   // Filtering logic ----------------------------------------------------
   const filtered = jobs.filter((job: any) => {
     const matchSearch =
-      job.title.toLowerCase().includes(search.toLowerCase()) ||
-      job.company.toLowerCase().includes(search.toLowerCase());
+      search
+        ? job.title.toLowerCase().includes(search.toLowerCase()) ||
+          job.company.toLowerCase().includes(search.toLowerCase())
+        : true;
+
+    const matchLocation = locationSearch
+      ? job.location.toLowerCase().includes(locationSearch.toLowerCase())
+      : true;
 
     const matchType = typeFilter ? job.type === typeFilter : true;
     const matchLevel = levelFilter ? job.level === levelFilter : true;
 
-    return matchSearch && matchType && matchLevel;
+    return matchSearch && matchLocation && matchType && matchLevel;
   });
 
   // Pagination logic
@@ -63,20 +79,17 @@ export default function JobsPage() {
         <p className="opacity-90">Tuesday, 24 Jan 2023</p>
 
         {/* Search Bar */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            placeholder="Job Title..."
-            className="px-4 py-2 rounded-md text-black"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+        <div className="mt-6">
+          <JobSearchBar
+            initialTitle={search}
+            initialLocation={locationSearch}
+            onSearchChange={({ title, location }: any) => {
+              setSearch(title ?? "");
+              setLocationSearch(location ?? "");
+              // update URL so filters are reflected in query params
+              router.push(`/jobs?title=${encodeURIComponent(title ?? "")}&location=${encodeURIComponent(location ?? "")}`);
+            }}
           />
-          <input
-            placeholder="Location..."
-            className="px-4 py-2 rounded-md text-black"
-          />
-          <button className="bg-primary text-white px-6 py-2 rounded-md">
-            Search
-          </button>
         </div>
       </div>
 

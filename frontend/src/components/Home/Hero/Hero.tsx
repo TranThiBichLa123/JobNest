@@ -1,11 +1,18 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import JobSearchBar from './JobSearchBar'
 import Image from 'next/image'
 import AOS from 'aos';
 import 'aos/dist/aos.css'; // You can also use <link> for styles
+import JobsPage from '@/app/jobs/page';
 
 const Hero = () => {
+    
+    const [filters, setFilters] = useState({
+    title: "",
+    location: ""
+  });
+
     return <div className='relative w-full h-screen flex justify-center flex-col'>
         <div className='w-[90%] md:w-[80%] mx-auto items-center grid grid-cols-1 xl:grid-cols-2 gap-10'>
             {/* Text Content */}
@@ -18,8 +25,13 @@ const Hero = () => {
                 <p className='mt-4 text-sm sm:text-lg font-medium'>
                     Find Jobs, Employment & Career Oppotunities
                 </p>
+                
                 {/* JobSearchBar */}
-                <JobSearchBar />
+                <JobSearchBar
+                  
+                />
+
+
                 {/* Popular search */}
                 <div className='text-base font-semibold text-gray-700 dark:text-gray-300 mt-6 flex items-center space-x-6'>
                     <span>Popular Searchs: </span>
