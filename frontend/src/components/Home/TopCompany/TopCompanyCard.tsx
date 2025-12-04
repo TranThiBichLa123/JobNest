@@ -1,7 +1,8 @@
-'use client'
+"use client"
 import Image from 'next/image';
 import React from 'react'
 import { GrLocation } from 'react-icons/gr';
+import Link from 'next/link';
 
 type Props = {
     data: {
@@ -16,7 +17,8 @@ type Props = {
 
 const TopCompanyCard = ({ data }: Props) => {
     return (
-        <div className='bg-gray-100 dark:bg-gray-800 rounded-lg p-6 m-3'>
+        <Link href={`/jobs?company=${encodeURIComponent(data.name)}`} className='no-underline'>
+            <div className='bg-gray-100 dark:bg-gray-800 rounded-lg p-6 m-3'>
             <Image
                 src={data.image}
                 alt={data.name}
@@ -34,7 +36,8 @@ const TopCompanyCard = ({ data }: Props) => {
             hover:text-white text-blue-800 dark:text-gray-200 rounded-lg mt-4 text-sm text-center'>
                {data.position} Open Position {" "} 
             </div>
-        </div>
+            </div>
+        </Link>
     )
 }
 

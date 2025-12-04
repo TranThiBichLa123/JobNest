@@ -12,9 +12,11 @@ import { BiFilterAlt } from "react-icons/bi";
 import Filters from "@/components/Home/Job/Filters";
 import JobList from "@/components/Home/Job/JobList";
 import { filters } from "@/data/jobFilters";
+import JobSearchBar from "@/components/Home/Hero/JobSearchBar";
 // SearchFilters might not exist in your project; we'll implement a small inline version below
 import useFetch from "@/hooks/useFetch";
 import { server } from "@/lib/config";
+import { useSearchParams } from 'next/navigation';
 
 // Stable mock jobs used when the API returns an empty list. Kept at module scope
 // so the array identity doesn't change between renders and cause effect loops.
@@ -22,7 +24,7 @@ const MOCK_JOBS = [
   {
     id: "mock-1",
     title: "Frontend Developer",
-    company_name: "Acme Corp",
+    company_name: "Udemy",
     company_location: "Hanoi, VN",
     logo_url: "/images/j1.png",
     type_of_employment: "Full Time",
@@ -31,6 +33,7 @@ const MOCK_JOBS = [
     description: "Build and maintain user interfaces using React and Next.js.",
     skills: ["React", "TypeScript", "Next.js"],
     salary_range: "$40k -55k",
+    category: "Development",
   },
   {
     id: "mock-2",
@@ -44,6 +47,7 @@ const MOCK_JOBS = [
     description: "Design REST APIs with Spring Boot and Java.",
     skills: ["Java", "Spring", "SQL"],
     salary_range: "$55k - 85k",
+    category: "Development",
   },
   {
     id: "mock-3",
@@ -57,6 +61,7 @@ const MOCK_JOBS = [
     description: "Design interfaces and experiences for web applications.",
     skills: ["Figma", "UX", "Prototyping"],
     salary_range: "$55k - 85k",
+    category: "Design",
   },
   {
     id: "mock-4",
@@ -70,6 +75,7 @@ const MOCK_JOBS = [
     description: "Maintain CI/CD pipelines and cloud infrastructure.",
     skills: ["AWS", "Docker", "Kubernetes"],
     salary_range: "$115k - 145k",
+    category: "Development",
   },
   {
     id: "mock-5",
@@ -83,6 +89,7 @@ const MOCK_JOBS = [
     description: "Ensure product quality through testing and automation.",
     skills: ["Selenium", "Testing"],
     salary_range: "$40k -55k",
+    category: "Development",
   },
   {
     id: "mock-6",
@@ -96,6 +103,7 @@ const MOCK_JOBS = [
     description: "Lead product direction and roadmap.",
     skills: ["Roadmapping", "Stakeholder Management"],
     salary_range: "$85k - 115k",
+    category: "Project Management",
   },
   {
     id: "mock-7",
@@ -109,6 +117,7 @@ const MOCK_JOBS = [
     description: "Analyze data and build predictive models.",
     skills: ["Python", "ML"],
     salary_range: "$85k - 115k",
+    category: "Development",
   },
   {
     id: "mock-8",
@@ -122,6 +131,7 @@ const MOCK_JOBS = [
     description: "Develop mobile apps using React Native.",
     skills: ["React Native", "iOS", "Android"],
     salary_range: "$55k - 85k",
+    category: "Development",
   },
   {
     id: "mock-9",
@@ -135,6 +145,7 @@ const MOCK_JOBS = [
     description: "Manage servers and networks.",
     skills: ["Linux", "Networking"],
     salary_range: "$115k - 145k",
+    category: "Development",
   },
   {
     id: "mock-10",
@@ -148,6 +159,7 @@ const MOCK_JOBS = [
     description: "Write technical documentation and guides.",
     skills: ["Writing", "Markdown"],
     salary_range: "$40k -55k",
+    category: "Marketing",
   },
   {
     id: "mock-11",
@@ -161,6 +173,7 @@ const MOCK_JOBS = [
     description: "Support sales with technical expertise.",
     skills: ["Pre-sales", "Demos"],
     salary_range: "$85k - 115k",
+    category: "Marketing",
   },
   {
     id: "mock-12",
@@ -174,11 +187,13 @@ const MOCK_JOBS = [
     description: "Ensure customers achieve value from our product.",
     skills: ["Support", "Onboarding"],
     salary_range: "$55k - 85k",
+    category: "Customer Service",
   },
 ];
 
 export default function JobsPage() {
   const { data: jobs = [], loading } = useFetch(`${server}/api/jobs`);
+  const searchParams = useSearchParams();
 
   // Fallback mock jobs for development / when API returns empty
   // NOTE: the real data comes from `jobs`; we use `MOCK_JOBS` when API returns empty.
@@ -187,18 +202,46 @@ export default function JobsPage() {
 
   const allJobs = !loading && jobs.length === 0 ? mockJobs : jobs;
 
+  // Get current date formatted
+  const getCurrentDate = () => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    return `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  };
+
+
+
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
 
   // Autocomplete / Search inputs
-  const [searchQueries, setSearchQueries] = useState({ title: "", location: "", type: "" });
-  const [showAutoComplete, setShowAutoComplete] = useState({ title: false, location: false, type: false });
-  const [autoCompletedResults, setAutoCompletedResults] = useState({ title: [], location: [], type: [] });
+  const [searchQueries, setSearchQueries] = useState({ title: "", location: "" });
+  const [showAutoComplete, setShowAutoComplete] = useState({ title: false, location: false });
+  const [autoCompletedResults, setAutoCompletedResults] = useState({ title: [], location: [] });
 
   // Mobile filter modal
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const handleCloseFiltermenu = (e: any) => {
     if (e.target.classList && e.target.classList.contains("filter-modal")) setIsFilterMenuOpen(false);
   };
+
+  // read query params (category, company, title, location) and prefill search/filters
+  useEffect(() => {
+    if (!searchParams) return;
+    const category = searchParams.get("category");
+    const company = searchParams.get("company");
+    const title = searchParams.get("title");
+    const location = searchParams.get("location");
+
+    if (title) setSearchQueries((prev) => ({ ...prev, title }));
+    if (location) setSearchQueries((prev) => ({ ...prev, location }));
+    // clicking company cards from Home should prefill the title search with company name
+    if (company) setSearchQueries((prev) => ({ ...prev, title: company }));
+
+    if (category) {
+      setSelectedFilters((prev) => ({ ...(prev || {}), category: [category] }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     setAutoCompletedResults((prev: any) => ({
@@ -214,12 +257,7 @@ export default function JobsPage() {
     }));
   }, [allJobs, searchQueries.location]);
 
-  useEffect(() => {
-    setAutoCompletedResults((prev: any) => ({
-      ...prev,
-      type: filterJobsByField(allJobs, "type_of_employment", searchQueries.type),
-    }));
-  }, [allJobs, searchQueries.type]);
+  // removed `type` text search - type is handled by checkbox filters
 
   function filterJobsByField(jobsList: any[], field: string, q: string) {
     if (!q) return [];
@@ -253,9 +291,12 @@ export default function JobsPage() {
     let isTitleMatch = true;
     let isLocationMatch = true;
     let isTypeMatch = true;
-    if (searchQueries.title) isTitleMatch = (job.title || "").toLowerCase().includes(searchQueries.title.toLowerCase());
+    if (searchQueries.title) {
+      const q = searchQueries.title.toLowerCase();
+      isTitleMatch = (job.title || "").toLowerCase().includes(q) || (job.company_name || "").toLowerCase().includes(q);
+    }
     if (searchQueries.location) isLocationMatch = (job.company_location || "").toLowerCase().includes(searchQueries.location.toLowerCase());
-    if (searchQueries.type) isTypeMatch = (job.type_of_employment || "").toLowerCase().includes(searchQueries.type.toLowerCase());
+    // if (searchQueries.type) isTypeMatch = (job.type_of_employment || "").toLowerCase().includes(searchQueries.type.toLowerCase());
 
     // Filter checkbox logic
     let matchesFilters = true;
@@ -287,119 +328,99 @@ export default function JobsPage() {
   const handlePageClick = (e: any) => {
     const newOffset = (e.selected * jobsPerPage) % (jobsToDisplay.length || 1);
     setOffset(newOffset);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const reset = () => setSearchQueries({ title: "", location: "", type: "" });
+  const reset = () => setSearchQueries({ title: "", location: "" });
 
   return (
-    <div className="px-6 py-10 max-w-7xl mx-auto">
+    <div className="pt-[12vh] min-h-screen bg-white dark:bg-[#0f2137]">
+      <div className="w-[92%] mx-auto py-10">
 
-      {/* Banner */}
-      <div
-        className="rounded-lg p-8 text-white bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/bg.jpg')" }}
-      >
-        <h1 className="text-3xl font-bold">Let's find your dream Job</h1>
-        <p className="opacity-90">Tuesday, 24 Jan 2023</p>
-
-        {/* Search Filters Inline */}
-        <div className="mt-10 px-6 pb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <input name="title" value={searchQueries.title} onChange={handleInputChange} className="px-4 py-2 rounded-md text-black w-full" placeholder="Job Title..." />
-              {showAutoComplete.title && autoCompletedResults.title?.length > 0 && (
-                <div className="absolute bg-white shadow mt-1 w-full z-10">
-                  {autoCompletedResults.title.slice(0, 6).map((j: any) => (
-                    <div key={j.id} className="px-3 py-2 hover:bg-slate-100 cursor-pointer" onClick={() => handleItemClick('title', j.title)}>
-                      {j.title}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              <input name="location" value={searchQueries.location} onChange={handleInputChange} className="px-4 py-2 rounded-md text-black w-full" placeholder="Location..." />
-              {showAutoComplete.location && autoCompletedResults.location?.length > 0 && (
-                <div className="absolute bg-white shadow mt-1 w-full z-10">
-                  {autoCompletedResults.location.slice(0, 6).map((j: any) => (
-                    <div key={j.id} className="px-3 py-2 hover:bg-slate-100 cursor-pointer" onClick={() => handleItemClick('location', j.company_location)}>
-                      {j.company_location}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="relative flex items-center gap-2">
-              <input name="type" value={searchQueries.type} onChange={handleInputChange} className="px-4 py-2 rounded-md text-black w-full" placeholder="Type..." />
-              <button onClick={() => setSearchQueries({ title: '', location: '', type: '' })} className="bg-primary text-white px-4 py-2 rounded-md">Search</button>
-            </div>
+        {/* Banner */}
+        <div
+          className="rounded-xl -mt-10 text-white bg-cover bg-center dark:bg-gray-800"
+          style={{ backgroundImage: "url('/images/bg.jpg')" }}
+        >
+          <div className="px-6 pt-4">
+            <h1 className="font-bold text-2xl">Let's find your dream Job</h1>
+            <p>{getCurrentDate()}</p>
           </div>
-        </div>
-      </div>
+          {/* Search Filters */}
+          <div className="mt-10 ">
+            <JobSearchBar
+              searchQueries={searchQueries}
+              handleInputChange={handleInputChange}
+              handleItemClick={handleItemClick}
+              showAutoComplete={showAutoComplete}
+              autoCompletedResults={autoCompletedResults}
+            />
+          </div>
 
-      <div className="mt-8">
-        <div className="grid md:grid-cols-3 gap-x-14">
-          <div className="md:col-span-1 row-start-3 md:row-start-auto h-fit md:sticky top-0">
-            <div className={`filter-modal ${isFilterMenuOpen ? 'open' : ''}`} onClick={handleCloseFiltermenu}>
-              <div className={`filter-dialog ${isFilterMenuOpen ? 'open' : ''}`}>
-                <div className="flex-center-between border-b dark:border-slate-800 md:hidden">
-                  <p className="uppercase">Filters</p>
-                  <div className="icon-box md:hidden" onClick={() => setIsFilterMenuOpen(false)}>
-                    <FiDelete />
+        </div>
+
+        <div className="mt-8">
+          <div className="grid md:grid-cols-3 gap-x-14">
+            <div className="md:col-span-1 row-start-3 md:row-start-auto h-fit md:sticky top-0">
+              <div className={`filter-modal ${isFilterMenuOpen ? 'open' : ''}`} onClick={handleCloseFiltermenu}>
+                <div className={`filter-dialog ${isFilterMenuOpen ? 'open' : ''}`}>
+                  <div className="flex-center-between border-b dark:border-slate-800 md:hidden">
+                    <p className="uppercase dark:text-white">Filters</p>
+                    <div className="icon-box md:hidden" onClick={() => setIsFilterMenuOpen(false)}>
+                      <FiDelete />
+                    </div>
+                  </div>
+                  <Filters selectedFilters={selectedFilters} handleFilterChange={handleFilterChange} counts={counts} />
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-2 mt-5 md:mt-0 h-fit md:sticky top-0">
+
+
+              <div className="flex-center-between mt-3">
+                <div className="flex-align-center gap-4" onClick={() => setIsFilterMenuOpen(true)}>
+                  <div className="md:hidden icon-box bg-white dark:bg-dark-card card-shadow dark:shadow-none card-bordered !rounded-md">
+                    <BiFilterAlt />
+                  </div>
+                  <h3 className="text-sm dark:text-white"><span className="text-muted dark:text-gray-400">Showing: </span>{jobsToDisplay.length} Jobs</h3>
+                </div>
+                <div className="flex-align-center gap-2">
+                  <p className="text-sm dark:text-gray-300">Sort by:</p>
+                  <div className="flex-align-center gap-2">
+                    <span className="text-sm text-primary">Posted Recently</span>
+                    <FiChevronDown className="dark:text-gray-300" />
                   </div>
                 </div>
-                <Filters selectedFilters={selectedFilters} handleFilterChange={handleFilterChange} counts={counts} />
               </div>
-            </div>
-          </div>
 
-          <div className="md:col-span-2 mt-5 md:mt-0 h-fit md:sticky top-0">
-            <div className="mt-3">
-              <h1 className="text-">{allJobs.length} jobs matched</h1>
-            </div>
+              <div className="mt-4">
+                <JobList jobs={currentJobs} loading={loading} />
+              </div>
 
-            <div className="flex-center-between mt-3">
-              <div className="flex-align-center gap-4" onClick={() => setIsFilterMenuOpen(true)}>
-                <div className="md:hidden icon-box bg-white dark:bg-dark-card card-shadow dark:shadow-none card-bordered !rounded-md">
-                  <BiFilterAlt />
+              {!loading && (
+                <div className="mt-5">
+                  <ReactPaginate
+                    breakLabel="..."
+                    nextLabel={<FiChevronsRight />}
+                    onPageChange={handlePageClick}
+                    pageRangeDisplayed={2}
+                    pageCount={pageCount}
+                    previousLabel={<FiChevronsLeft />}
+                    renderOnZeroPageCount={null}
+                    containerClassName="wb-pagination"
+                    pageClassName="pagination-item"
+                    pageLinkClassName="pagination-link"
+                    activeClassName="pagination-link-active"
+                    previousLinkClassName="prev"
+                    nextLinkClassName="next"
+                    disabledClassName="disabled"
+                  />
                 </div>
-                <h3 className="text-sm"><span className="text-muted">Showing: </span>{jobsToDisplay.length} Jobs</h3>
-              </div>
-              <div className="flex-align-center gap-2">
-                <p className="text-sm">Sort by:</p>
-                <div className="flex-align-center gap-2">
-                  <span className="text-sm text-primary">Posted Recently</span>
-                  <FiChevronDown />
-                </div>
-              </div>
+              )}
             </div>
-
-            <div className="mt-4">
-              <JobList jobs={currentJobs} loading={loading} />
-            </div>
-
-            {!loading && (
-              <div className="mt-5">
-                <ReactPaginate
-                  breakLabel="..."
-                  nextLabel={<FiChevronsRight />}
-                  onPageChange={handlePageClick}
-                  pageRangeDisplayed={2}
-                  pageCount={pageCount}
-                  previousLabel={<FiChevronsLeft />}
-                  renderOnZeroPageCount={null}
-                  containerClassName="wb-pagination"
-                  pageClassName="pagination-item"
-                  pageLinkClassName="pagination-link"
-                  activeClassName="pagination-link-active"
-                  previousLinkClassName="prev"
-                  nextLinkClassName="next"
-                  disabledClassName="disabled"
-                />
-              </div>
-            )}
           </div>
         </div>
       </div>

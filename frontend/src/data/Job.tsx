@@ -100,10 +100,12 @@ const Job = () => {
                 })}
             </div>
             <div className='mt-10 text-center'>
-                <button className='px-10 py-4 bg-blue-700 text-white cursor-pointer rounded-lg hover:to-blue-800
-    transition-all duration-200'>
-                    Load More Listing
-                </button>
+                <div>
+                    <a href="/jobs" className='px-10 py-4 bg-blue-700 text-white cursor-pointer rounded-lg hover:to-blue-800
+        transition-all duration-200 inline-block'>
+                        Load More Listing
+                    </a>
+                </div>
             </div>
 
         </div>

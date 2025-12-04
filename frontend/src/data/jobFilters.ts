@@ -13,6 +13,20 @@ export const filters = [
     ],
   },
   {
+    label: "category",
+    name: "category",
+    filters: [
+      "Accounting / Finance",
+      "Marketing",
+      "Design",
+      "Development",
+      "Project Management",
+      "Customer Service",
+      "Health and Care",
+      "Automative Jobs",
+    ],
+  },
+  {
     label: "experience level",
     name: "experience_level",
     filters: [

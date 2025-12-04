@@ -1,33 +1,56 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FaMap } from 'react-icons/fa';
 import { MdSearch } from 'react-icons/md';
 
-const JobSearchBar = ({ onSearchChange, initialTitle = "", initialLocation = "" }: any) => {
-    const [title, setTitle] = useState("");
-    const [location, setLocation] = useState("");
-    const router = useRouter(); // ✔ DÙNG ĐÚNG cho App Router
+const JobSearchBar = ({ 
+    onSearchChange,
+    handleInputChange,
+    handleItemClick,
+    searchQueries,
+    showAutoComplete,
+    autoCompletedResults,
+    reset
+}: any) => {
+    const router = useRouter();
+    
+    // Local state for when component is used standalone (e.g., on Home page)
+    const [localTitle, setLocalTitle] = useState("");
+    const [localLocation, setLocalLocation] = useState("");
+    
+    // Use parent's searchQueries if provided, otherwise use local state
+    const titleValue = searchQueries?.title ?? localTitle;
+    const locationValue = searchQueries?.location ?? localLocation;
 
-    // If parent passes initial values (e.g., from query params), sync them into local state
-    useEffect(() => {
-        setTitle(initialTitle ?? "");
-    }, [initialTitle]);
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (handleInputChange) {
+            handleInputChange(e);
+        } else {
+            setLocalTitle(value);
+        }
+    };
 
-    useEffect(() => {
-        setLocation(initialLocation ?? "");
-    }, [initialLocation]);
+    const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (handleInputChange) {
+            handleInputChange(e);
+        } else {
+            setLocalLocation(value);
+        }
+    };
 
     const handleSearch = () => {
-        // Nếu PARENT truyền hàm → gọi hàm
+        // If parent provides onSearchChange callback, use it
         if (onSearchChange) {
-            onSearchChange({ title, location });
+            onSearchChange({ title: titleValue, location: locationValue });
             return;
         }
 
-        // Nếu KHÔNG truyền → nghĩa là đang ở HOME → chuyển trang
-        router.push(`/jobs?title=${title}&location=${location}`);
+        // Otherwise navigate to jobs page (for Home page usage)
+        router.push(`/jobs?title=${titleValue || ''}&location=${locationValue || ''}`);
     };
 
     return (
@@ -37,60 +60,58 @@ const JobSearchBar = ({ onSearchChange, initialTitle = "", initialLocation = "" 
                       shadow-md rounded-xl overflow-hidden">
 
                 {/* Job Title */}
-                <div className="flex items-center w-full md:w-1/2
+                <div className="relative flex items-center w-full md:w-1/2
                         px-4 py-3 sm:py-4
                         border-b md:border-b-0 md:border-r
                         border-slate-200 dark:border-slate-700">
                     <MdSearch className="text-slate-500 text-xl mr-2" />
-                    {/* <input
-                        type="text"
-                        placeholder="Job title or company"
-                        value={title}
-                        onChange={(e) => {
-                            setTitle(e.target.value);
-                            emit(e.target.value, location);
-                        }}
-                        className="flex-1 h-10 bg-transparent outline-none
-                       text-slate-900 dark:text-slate-100"
-                    /> */}
-
                     <input type="text"
+                        name="title"
                         className="flex-1 h-10 bg-transparent outline-none
                        text-slate-900 dark:text-slate-100"
                         placeholder="Job title or company"
-
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        value={titleValue}
+                        onChange={handleTitleChange}
                     />
-
-
-
+                    {showAutoComplete?.title && autoCompletedResults?.title?.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-700 shadow-lg mt-1 w-full z-[100] rounded-md max-h-60 overflow-y-auto">
+                            {autoCompletedResults.title.slice(0, 6).map((j: any) => (
+                                <div 
+                                    key={j.id} 
+                                    className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-gray-600 cursor-pointer text-black dark:text-white border-b dark:border-gray-600 last:border-b-0" 
+                                    onClick={() => handleItemClick && handleItemClick('title', j.title)}
+                                >
+                                    {j.title}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Location */}
-                <div className="flex items-center w-full md:w-1/2 px-4 py-3 sm:py-4">
+                <div className="relative flex items-center w-full md:w-1/2 px-4 py-3 sm:py-4">
                     <FaMap className="text-slate-500 text-xl mr-2" />
-                    {/* <input
-                        type="text"
-                        placeholder="City or postcode"
-                        value={location}
-                        onChange={(e) => {
-                            setLocation(e.target.value);
-                            emit(title, e.target.value);
-                        }}
+                    <input type="text"
+                        name="location"
                         className="flex-1 h-10 bg-transparent outline-none
                        text-slate-900 dark:text-slate-100"
-                    /> */}
-
-
-
-
-                    <input type="text"
-                        className="flex-1 h-10 bg-transparent outline-none
-                       text-slate-900 dark:text-slate-100"       placeholder="City or postcode"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="City or postcode"
+                        value={locationValue}
+                        onChange={handleLocationChange}
                     />
+                    {showAutoComplete?.location && autoCompletedResults?.location?.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-700 shadow-lg mt-1 w-full z-[100] rounded-md max-h-60 overflow-y-auto">
+                            {autoCompletedResults.location.slice(0, 6).map((j: any) => (
+                                <div 
+                                    key={j.id} 
+                                    className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-gray-600 cursor-pointer text-black dark:text-white border-b dark:border-gray-600 last:border-b-0" 
+                                    onClick={() => handleItemClick && handleItemClick('location', j.company_location)}
+                                >
+                                    {j.company_location}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Search Button */}

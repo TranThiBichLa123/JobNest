@@ -37,8 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ScrollToTop />
             </Provider>
           </AuthProvider>
-
-
         </GoogleOAuthProvider>
 
       </body>

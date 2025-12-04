@@ -26,12 +26,15 @@ const JobList = ({ jobs, loading }: any) => {
                     className="w-14 rounded-lg"
                   />
                   <div>
-                    <Link href={`/jobs/${job?.id}`} className="group-hover:text-primary transition-a">
-                      <h1 className="text-xl font-semibold">{job?.title}</h1>
-                    </Link>
-                    <p className="text-sm">
-                      {job?.company_name} <span className="text-xl mx-2">.</span>3 days ago
-                    </p>
+                        <Link href={`/jobs/${job?.id}`} className="group-hover:text-primary transition-a">
+                          <h1 className="text-xl font-semibold">{job?.title}</h1>
+                        </Link>
+                        <p className="text-sm">
+                          {job?.company_name} <span className="text-xl mx-2">.</span>3 days ago
+                        </p>
+                        <div className="mt-1">
+                          <span className="text-sm text-muted bg-slate-200 rounded-sm px-2 py-[1px]">{job?.category}</span>
+                        </div>
                   </div>
                 </div>
 

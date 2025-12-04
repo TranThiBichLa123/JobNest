@@ -10,6 +10,7 @@ import { RiCustomerService2Fill } from 'react-icons/ri'
 import { MdOutlineMedicalServices } from 'react-icons/md'
 import { LiaCarSideSolid } from 'react-icons/lia'
 import CategoryCard from './CategoryCard'
+import Link from 'next/link'
 
 const categoryData = [
   {
@@ -70,10 +71,10 @@ const Category = () => {
       />
       <div className='w-[80%] mx-auto mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
         {categoryData.map((category, index )=>{
-          return <div key={category.id} data-aos='faded-right' data-aos-anchor-placement='top-center'
-         data-aos-delay={index*100}
-         >
-            <CategoryCard category={category}/>
+          return <div key={category.id} data-aos='faded-right' data-aos-anchor-placement='top-center' data-aos-delay={index*100}>
+            <Link href={`/jobs?category=${encodeURIComponent(category.categoryName)}`}>
+              <CategoryCard category={category}/>
+            </Link>
           </div>
         })}
       </div>

@@ -63,14 +63,14 @@ const Nav = ({ openNav }: Props) => {
                 <div className='flex items-center sm:space-x-20'>
                     {/* LOGO */}
 
-                    <div className='flex items-center space-x-2'>
+                    <Link href="/" className='flex items-center space-x-2'>
                         <div className='w-10 h-10 bg-cyan-800  rounded-full flex items-center justify-center flex-col'>
                             <LuNetwork className='w-5 h-5 text-white ' />
                         </div>
                         <h1 className='text-xl hidden sm:block md:text-2xl text-cyan-800 dark:text-white font-bold'>
                             JobNest
                         </h1>
-                    </div>
+                    </Link>
 
                     {/* NAVLINKS */}
                     <div className='hidden lg:flex items-center space-x-10'>
