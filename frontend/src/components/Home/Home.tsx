@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react'
 import Hero from './Hero/Hero'
 import Category from './Category/Category'
-import Job from './Job/Job'
+import Job from '../../data/Job'
 import TopCompany from './TopCompany/TopCompany'
 import Info from './Info/Info'
 import Price from './Price/Price'

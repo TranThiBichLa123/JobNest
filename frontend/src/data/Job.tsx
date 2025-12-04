@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
-import SelectionHeading from '../../Helper/SelectionHeading'
-import JobCard from './JobCard'
+import SelectionHeading from '../components/Helper/SelectionHeading'
+import JobCard from '../components/Home/Job/JobCard'
 
 
 

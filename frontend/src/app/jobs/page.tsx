@@ -1,71 +1,296 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { FiChevronsRight, FiChevronsLeft, FiChevronDown } from "react-icons/fi";
-import api from "@/lib/axios";
-import JobSearchBar from "@/components/Home/Hero/JobSearchBar";
+import ReactPaginate from "react-paginate";
+import {
+  FiChevronsRight,
+  FiChevronsLeft,
+  FiChevronDown,
+  FiDelete,
+} from "react-icons/fi";
+import { BiFilterAlt } from "react-icons/bi";
+import Filters from "@/components/Home/Job/Filters";
+import JobList from "@/components/Home/Job/JobList";
+import { filters } from "@/data/jobFilters";
+// SearchFilters might not exist in your project; we'll implement a small inline version below
+import useFetch from "@/hooks/useFetch";
+import { server } from "@/lib/config";
+
+// Stable mock jobs used when the API returns an empty list. Kept at module scope
+// so the array identity doesn't change between renders and cause effect loops.
+const MOCK_JOBS = [
+  {
+    id: "mock-1",
+    title: "Frontend Developer",
+    company_name: "Acme Corp",
+    company_location: "Hanoi, VN",
+    logo_url: "/images/j1.png",
+    type_of_employment: "Full-time",
+    experience: "2+ years",
+    experience_level: "Junior",
+    description: "Build and maintain user interfaces using React and Next.js.",
+    skills: ["React", "TypeScript", "Next.js"],
+    salary_range: "$800 - $1200",
+  },
+  {
+    id: "mock-2",
+    title: "Backend Developer",
+    company_name: "Beta Solutions",
+    company_location: "Ho Chi Minh City, VN",
+    logo_url: "/images/j2.png",
+    type_of_employment: "Part-time",
+    experience: "4+ years",
+    experience_level: "Mid",
+    description: "Design REST APIs with Spring Boot and Java.",
+    skills: ["Java", "Spring", "SQL"],
+    salary_range: "$1000 - $1500",
+  },
+  {
+    id: "mock-3",
+    title: "UI/UX Designer",
+    company_name: "Creative Studio",
+    company_location: "Da Nang, VN",
+    logo_url: "/images/j3.png",
+    type_of_employment: "Contract",
+    experience: "3+ years",
+    experience_level: "Mid",
+    description: "Design interfaces and experiences for web applications.",
+    skills: ["Figma", "UX", "Prototyping"],
+    salary_range: "$600 - $900",
+  },
+  {
+    id: "mock-4",
+    title: "DevOps Engineer",
+    company_name: "CloudOps",
+    company_location: "Remote",
+    logo_url: "/images/j4.png",
+    type_of_employment: "Full-time",
+    experience: "5+ years",
+    experience_level: "Senior",
+    description: "Maintain CI/CD pipelines and cloud infrastructure.",
+    skills: ["AWS", "Docker", "Kubernetes"],
+    salary_range: "$1500 - $2200",
+  },
+  {
+    id: "mock-5",
+    title: "QA Engineer",
+    company_name: "QualityWorks",
+    company_location: "Hanoi, VN",
+    logo_url: "/images/j5.png",
+    type_of_employment: "Full-time",
+    experience: "2+ years",
+    experience_level: "Junior",
+    description: "Ensure product quality through testing and automation.",
+    skills: ["Selenium", "Testing"],
+    salary_range: "$700 - $1000",
+  },
+  {
+    id: "mock-6",
+    title: "Product Manager",
+    company_name: "Prodify",
+    company_location: "Hanoi, VN",
+    logo_url: "/images/j6.png",
+    type_of_employment: "Full-time",
+    experience: "4+ years",
+    experience_level: "Mid",
+    description: "Lead product direction and roadmap.",
+    skills: ["Roadmapping", "Stakeholder Management"],
+    salary_range: "$1200 - $1800",
+  },
+  {
+    id: "mock-7",
+    title: "Data Scientist",
+    company_name: "Insight Labs",
+    company_location: "Ho Chi Minh City, VN",
+    logo_url: "/images/j7.png",
+    type_of_employment: "Full-time",
+    experience: "3+ years",
+    experience_level: "Mid",
+    description: "Analyze data and build predictive models.",
+    skills: ["Python", "ML"],
+    salary_range: "$1400 - $2000",
+  },
+  {
+    id: "mock-8",
+    title: "Mobile Developer",
+    company_name: "Appify",
+    company_location: "Da Nang, VN",
+    logo_url: "/images/j8.png",
+    type_of_employment: "Contract",
+    experience: "2+ years",
+    experience_level: "Junior",
+    description: "Develop mobile apps using React Native.",
+    skills: ["React Native", "iOS", "Android"],
+    salary_range: "$900 - $1300",
+  },
+  {
+    id: "mock-9",
+    title: "System Administrator",
+    company_name: "InfraHub",
+    company_location: "Remote",
+    logo_url: "/images/j9.png",
+    type_of_employment: "Full-time",
+    experience: "5+ years",
+    experience_level: "Senior",
+    description: "Manage servers and networks.",
+    skills: ["Linux", "Networking"],
+    salary_range: "$1100 - $1600",
+  },
+  {
+    id: "mock-10",
+    title: "Technical Writer",
+    company_name: "DocsCo",
+    company_location: "Hanoi, VN",
+    logo_url: "/images/l1.png",
+    type_of_employment: "Part-time",
+    experience: "1+ years",
+    experience_level: "Junior",
+    description: "Write technical documentation and guides.",
+    skills: ["Writing", "Markdown"],
+    salary_range: "$500 - $800",
+  },
+  {
+    id: "mock-11",
+    title: "Sales Engineer",
+    company_name: "SalesTech",
+    company_location: "Ho Chi Minh City, VN",
+    logo_url: "/images/l2.png",
+    type_of_employment: "Full-time",
+    experience: "3+ years",
+    experience_level: "Mid",
+    description: "Support sales with technical expertise.",
+    skills: ["Pre-sales", "Demos"],
+    salary_range: "$900 - $1400",
+  },
+  {
+    id: "mock-12",
+    title: "Customer Success",
+    company_name: "HappyClients",
+    company_location: "Da Nang, VN",
+    logo_url: "/images/l3.png",
+    type_of_employment: "Full-time",
+    experience: "2+ years",
+    experience_level: "Junior",
+    description: "Ensure customers achieve value from our product.",
+    skills: ["Support", "Onboarding"],
+    salary_range: "$600 - $900",
+  },
+];
 
 export default function JobsPage() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: jobs = [], loading } = useFetch(`${server}/api/jobs`);
 
-  // Search
-  const [search, setSearch] = useState("");
-  const [locationSearch, setLocationSearch] = useState("");
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  // Fallback mock jobs for development / when API returns empty
+  // NOTE: the real data comes from `jobs`; we use `MOCK_JOBS` when API returns empty.
+  // `MOCK_JOBS` is declared at module scope to keep its identity stable between renders.
+  const mockJobs = MOCK_JOBS;
 
-  // Filters (simple version)
-  const [typeFilter, setTypeFilter] = useState("");
-  const [levelFilter, setLevelFilter] = useState("");
+  const allJobs = !loading && jobs.length === 0 ? mockJobs : jobs;
 
-  // Pagination
-  const [page, setPage] = useState(0);
-  const jobsPerPage = 4;
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
 
-  useEffect(() => {
-    loadJobs();
-    // If there are query params (from the Hero search), populate local search inputs
-    const titleQ = searchParams?.get("title") ?? "";
-    const locationQ = searchParams?.get("location") ?? "";
-    if (titleQ) setSearch(titleQ);
-    if (locationQ) setLocationSearch(locationQ);
-  }, [searchParams]);
+  // Autocomplete / Search inputs
+  const [searchQueries, setSearchQueries] = useState({ title: "", location: "", type: "" });
+  const [showAutoComplete, setShowAutoComplete] = useState({ title: false, location: false, type: false });
+  const [autoCompletedResults, setAutoCompletedResults] = useState({ title: [], location: [], type: [] });
 
-  const loadJobs = async () => {
-    try {
-      const res = await api.get("/jobs");
-      setJobs(res.data);
-    } catch (err) {
-      console.log("API Error:", err);
-    } finally {
-      setLoading(false);
-    }
+  // Mobile filter modal
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const handleCloseFiltermenu = (e: any) => {
+    if (e.target.classList && e.target.classList.contains("filter-modal")) setIsFilterMenuOpen(false);
   };
 
-  // Filtering logic ----------------------------------------------------
-  const filtered = jobs.filter((job: any) => {
-    const matchSearch =
-      search
-        ? job.title.toLowerCase().includes(search.toLowerCase()) ||
-          job.company.toLowerCase().includes(search.toLowerCase())
-        : true;
+  useEffect(() => {
+    setAutoCompletedResults((prev: any) => ({
+      ...prev,
+      title: filterJobsByField(allJobs, "title", searchQueries.title),
+    }));
+  }, [allJobs, searchQueries.title]);
 
-    const matchLocation = locationSearch
-      ? job.location.toLowerCase().includes(locationSearch.toLowerCase())
-      : true;
+  useEffect(() => {
+    setAutoCompletedResults((prev: any) => ({
+      ...prev,
+      location: filterJobsByField(allJobs, "company_location", searchQueries.location),
+    }));
+  }, [allJobs, searchQueries.location]);
 
-    const matchType = typeFilter ? job.type === typeFilter : true;
-    const matchLevel = levelFilter ? job.level === levelFilter : true;
+  useEffect(() => {
+    setAutoCompletedResults((prev: any) => ({
+      ...prev,
+      type: filterJobsByField(allJobs, "type_of_employment", searchQueries.type),
+    }));
+  }, [allJobs, searchQueries.type]);
 
-    return matchSearch && matchLocation && matchType && matchLevel;
+  function filterJobsByField(jobsList: any[], field: string, q: string) {
+    if (!q) return [];
+    return jobsList.filter((job: any) => (job[field] || "").toLowerCase().includes(q.toLowerCase()));
+  }
+
+  const handleInputChange = (e: any) => {
+    const { name, value } = e.target;
+    setSearchQueries((prev) => ({ ...prev, [name]: value }));
+    setShowAutoComplete((prev) => ({ ...prev, [name]: !!value }));
+  };
+
+  const handleItemClick = (name: string, value: string) => {
+    setSearchQueries((prev) => ({ ...prev, [name]: value }));
+    setShowAutoComplete((prev) => ({ ...prev, [name]: false }));
+  };
+
+  const handleFilterChange = (filterName: string, filterValue: string, isChecked: boolean) => {
+    setSelectedFilters((prev: any) => {
+      const updated = { ...(prev || {}) };
+      if (isChecked) updated[filterName] = [...(prev?.[filterName] || []), filterValue];
+      else updated[filterName] = (prev?.[filterName] || []).filter((v: string) => v !== filterValue);
+      return updated;
+    });
+    setOffset(0);
+  };
+
+  // Filtering logic
+  let filteredJobs = allJobs.filter((job: any) => {
+    for (const [filterName, selectedValues] of Object.entries(selectedFilters) as [string, string[]][]) {
+      if (selectedValues.length > 0 && !selectedValues.includes(job[filterName])) return false;
+    }
+    return true;
   });
 
-  // Pagination logic
-  const pageCount = Math.ceil(filtered.length / jobsPerPage);
-  const pageStart = page * jobsPerPage;
-  const currentJobs = filtered.slice(pageStart, pageStart + jobsPerPage);
+  // Search filtering
+  const filteredJobsBySearch = allJobs.filter((job: any) => {
+    let isTitleMatch = true;
+    let isLocationMatch = true;
+    let isTypeMatch = true;
+    if (searchQueries.title) isTitleMatch = (job.title || "").toLowerCase().includes(searchQueries.title.toLowerCase());
+    if (searchQueries.location) isLocationMatch = (job.company_location || "").toLowerCase().includes(searchQueries.location.toLowerCase());
+    if (searchQueries.type) isTypeMatch = (job.type_of_employment || "").toLowerCase().includes(searchQueries.type.toLowerCase());
+    return isTitleMatch && isLocationMatch && isTypeMatch;
+  });
+
+  let jobsToDisplay = allJobs;
+  if (searchQueries.title || searchQueries.location || searchQueries.type) jobsToDisplay = filteredJobsBySearch;
+  else if (selectedFilters && Object.keys(selectedFilters).length > 0) jobsToDisplay = filteredJobs;
+
+  // counts
+  const counts: any = {};
+  filters.forEach((f) => {
+    f.filters.forEach((value: string) => {
+      counts[value] = (allJobs || []).filter((job: any) => job[f.name] === value).length;
+    });
+  });
+
+  // Pagination
+  const [offset, setOffset] = useState(0);
+  const jobsPerPage = 4;
+  const endOffset = offset + jobsPerPage;
+  const currentJobs = jobsToDisplay.slice(offset, endOffset);
+  const pageCount = Math.ceil(jobsToDisplay.length / jobsPerPage) || 0;
+
+  const handlePageClick = (e: any) => {
+    const newOffset = (e.selected * jobsPerPage) % (jobsToDisplay.length || 1);
+    setOffset(newOffset);
+  };
+
+  const reset = () => setSearchQueries({ title: "", location: "", type: "" });
 
   return (
     <div className="px-6 py-10 max-w-7xl mx-auto">
@@ -78,146 +303,105 @@ export default function JobsPage() {
         <h1 className="text-3xl font-bold">Let's find your dream Job</h1>
         <p className="opacity-90">Tuesday, 24 Jan 2023</p>
 
-        {/* Search Bar */}
-        <div className="mt-6">
-          <JobSearchBar
-            initialTitle={search}
-            initialLocation={locationSearch}
-            onSearchChange={({ title, location }: any) => {
-              setSearch(title ?? "");
-              setLocationSearch(location ?? "");
-              // update URL so filters are reflected in query params
-              router.push(`/jobs?title=${encodeURIComponent(title ?? "")}&location=${encodeURIComponent(location ?? "")}`);
-            }}
-          />
+        {/* Search Filters Inline */}
+        <div className="mt-10 px-6 pb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <input name="title" value={searchQueries.title} onChange={handleInputChange} className="px-4 py-2 rounded-md text-black w-full" placeholder="Job Title..." />
+              {showAutoComplete.title && autoCompletedResults.title?.length > 0 && (
+                <div className="absolute bg-white shadow mt-1 w-full z-10">
+                  {autoCompletedResults.title.slice(0, 6).map((j: any) => (
+                    <div key={j.id} className="px-3 py-2 hover:bg-slate-100 cursor-pointer" onClick={() => handleItemClick('title', j.title)}>
+                      {j.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <input name="location" value={searchQueries.location} onChange={handleInputChange} className="px-4 py-2 rounded-md text-black w-full" placeholder="Location..." />
+              {showAutoComplete.location && autoCompletedResults.location?.length > 0 && (
+                <div className="absolute bg-white shadow mt-1 w-full z-10">
+                  {autoCompletedResults.location.slice(0, 6).map((j: any) => (
+                    <div key={j.id} className="px-3 py-2 hover:bg-slate-100 cursor-pointer" onClick={() => handleItemClick('location', j.company_location)}>
+                      {j.company_location}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="relative flex items-center gap-2">
+              <input name="type" value={searchQueries.type} onChange={handleInputChange} className="px-4 py-2 rounded-md text-black w-full" placeholder="Type..." />
+              <button onClick={() => setSearchQueries({ title: '', location: '', type: '' })} className="bg-primary text-white px-4 py-2 rounded-md">Search</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-10 mt-10">
-        {/* --------------------------------- FILTER SIDEBAR --------------------------------- */}
-        <div className="space-y-6">
-          <div>
-            <h3 className="font-semibold mb-2">Type of Employment</h3>
-            <div className="space-y-2">
-              {["Full Time", "Part Time", "Remote"].map((t) => (
-                <label key={t} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="type"
-                    checked={typeFilter === t}
-                    onChange={() => setTypeFilter(t)}
-                  />
-                  {t}
-                </label>
-              ))}
-              <button
-                className="text-xs text-blue-600 mt-1"
-                onClick={() => setTypeFilter("")}
-              >
-                Clear
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-2">Experience Level</h3>
-            <div className="space-y-2">
-              {["Senior", "Mid Level", "Entry Level"].map((l) => (
-                <label key={l} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="level"
-                    checked={levelFilter === l}
-                    onChange={() => setLevelFilter(l)}
-                  />
-                  {l}
-                </label>
-              ))}
-              <button
-                className="text-xs text-blue-600 mt-1"
-                onClick={() => setLevelFilter("")}
-              >
-                Clear
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* -------------------------------- JOB LIST -------------------------------- */}
-        <div className="md:col-span-2 space-y-4">
-          <div className="flex justify-between items-center">
-            <p className="text-sm">
-              <span className="opacity-70">Showing: </span>
-              {filtered.length} Jobs
-            </p>
-
-            <div className="flex items-center gap-2 text-sm">
-              Sort by:
-              <span className="text-primary flex items-center gap-1">
-                Posted Recently <FiChevronDown />
-              </span>
-            </div>
-          </div>
-
-          {loading && <p>Loading...</p>}
-
-          {currentJobs.map((job: any) => (
-            <div
-              key={job.id}
-              className="p-5 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-            >
-              <h2 className="text-lg font-semibold">{job.title}</h2>
-              <p className="text-sm text-gray-500">
-                {job.company} • {job.location}
-              </p>
-
-              <div className="flex items-center gap-3 mt-2 text-sm">
-                <span className="bg-gray-200 px-2 py-1 rounded">
-                  {job.type}
-                </span>
-                <span className="bg-gray-200 px-2 py-1 rounded">
-                  {job.level}
-                </span>
-              </div>
-
-              <div className="flex justify-end mt-3">
-                <button className="bg-green-500 text-white px-4 py-1 rounded">
-                  Apply Now
-                </button>
+      <div className="mt-8">
+        <div className="grid md:grid-cols-3 gap-x-14">
+          <div className="md:col-span-1 row-start-3 md:row-start-auto h-fit md:sticky top-0">
+            <div className={`filter-modal ${isFilterMenuOpen ? 'open' : ''}`} onClick={handleCloseFiltermenu}>
+              <div className={`filter-dialog ${isFilterMenuOpen ? 'open' : ''}`}>
+                <div className="flex-center-between border-b dark:border-slate-800 md:hidden">
+                  <p className="uppercase">Filters</p>
+                  <div className="icon-box md:hidden" onClick={() => setIsFilterMenuOpen(false)}>
+                    <FiDelete />
+                  </div>
+                </div>
+                <Filters selectedFilters={selectedFilters} handleFilterChange={handleFilterChange} counts={counts} />
               </div>
             </div>
-          ))}
+          </div>
 
-          {/* ------------------------- PAGINATION ------------------------- */}
-          {pageCount > 1 && (
-            <div className="flex gap-2 justify-center mt-4">
-              <button
-                onClick={() => setPage(Math.max(0, page - 1))}
-                className="px-3 py-1 border rounded"
-              >
-                <FiChevronsLeft />
-              </button>
-
-              {Array.from({ length: pageCount }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i)}
-                  className={`px-3 py-1 border rounded ${
-                    i === page ? "bg-primary text-white" : ""
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-
-              <button
-                onClick={() => setPage(Math.min(pageCount - 1, page + 1))}
-                className="px-3 py-1 border rounded"
-              >
-                <FiChevronsRight />
-              </button>
+          <div className="md:col-span-2 mt-5 md:mt-0 h-fit md:sticky top-0">
+            <div className="mt-3">
+              <h1 className="text-">{allJobs.length} jobs matched</h1>
             </div>
-          )}
+
+            <div className="flex-center-between mt-3">
+              <div className="flex-align-center gap-4" onClick={() => setIsFilterMenuOpen(true)}>
+                <div className="md:hidden icon-box bg-white dark:bg-dark-card card-shadow dark:shadow-none card-bordered !rounded-md">
+                  <BiFilterAlt />
+                </div>
+                <h3 className="text-sm"><span className="text-muted">Showing: </span>{jobsToDisplay.length} Jobs</h3>
+              </div>
+              <div className="flex-align-center gap-2">
+                <p className="text-sm">Sort by:</p>
+                <div className="flex-align-center gap-2">
+                  <span className="text-sm text-primary">Posted Recently</span>
+                  <FiChevronDown />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <JobList jobs={currentJobs} loading={loading} />
+            </div>
+
+            {!loading && (
+              <div className="mt-5">
+                <ReactPaginate
+                  breakLabel="..."
+                  nextLabel={<FiChevronsRight />}
+                  onPageChange={handlePageClick}
+                  pageRangeDisplayed={2}
+                  pageCount={pageCount}
+                  previousLabel={<FiChevronsLeft />}
+                  renderOnZeroPageCount={null}
+                  containerClassName="wb-pagination"
+                  pageClassName="pagination-item"
+                  pageLinkClassName="pagination-link"
+                  activeClassName="pagination-link-active"
+                  previousLinkClassName="prev"
+                  nextLinkClassName="next"
+                  disabledClassName="disabled"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
