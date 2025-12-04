@@ -25,12 +25,12 @@ const MOCK_JOBS = [
     company_name: "Acme Corp",
     company_location: "Hanoi, VN",
     logo_url: "/images/j1.png",
-    type_of_employment: "Full-time",
-    experience: "2+ years",
-    experience_level: "Junior",
+    type_of_employment: "Full Time",
+    experience: "1 - 2 Years",
+    experience_level: "Entry Level",
     description: "Build and maintain user interfaces using React and Next.js.",
     skills: ["React", "TypeScript", "Next.js"],
-    salary_range: "$800 - $1200",
+    salary_range: "$40k -55k",
   },
   {
     id: "mock-2",
@@ -38,12 +38,12 @@ const MOCK_JOBS = [
     company_name: "Beta Solutions",
     company_location: "Ho Chi Minh City, VN",
     logo_url: "/images/j2.png",
-    type_of_employment: "Part-time",
-    experience: "4+ years",
-    experience_level: "Mid",
+    type_of_employment: "Part Time",
+    experience: "2 - 6 Years",
+    experience_level: "Mid Level",
     description: "Design REST APIs with Spring Boot and Java.",
     skills: ["Java", "Spring", "SQL"],
-    salary_range: "$1000 - $1500",
+    salary_range: "$55k - 85k",
   },
   {
     id: "mock-3",
@@ -52,11 +52,11 @@ const MOCK_JOBS = [
     company_location: "Da Nang, VN",
     logo_url: "/images/j3.png",
     type_of_employment: "Contract",
-    experience: "3+ years",
-    experience_level: "Mid",
+    experience: "2 - 6 Years",
+    experience_level: "Mid Level",
     description: "Design interfaces and experiences for web applications.",
     skills: ["Figma", "UX", "Prototyping"],
-    salary_range: "$600 - $900",
+    salary_range: "$55k - 85k",
   },
   {
     id: "mock-4",
@@ -64,12 +64,12 @@ const MOCK_JOBS = [
     company_name: "CloudOps",
     company_location: "Remote",
     logo_url: "/images/j4.png",
-    type_of_employment: "Full-time",
-    experience: "5+ years",
-    experience_level: "Senior",
+    type_of_employment: "Remote",
+    experience: "Over 6 Years",
+    experience_level: "Senior Level",
     description: "Maintain CI/CD pipelines and cloud infrastructure.",
     skills: ["AWS", "Docker", "Kubernetes"],
-    salary_range: "$1500 - $2200",
+    salary_range: "$115k - 145k",
   },
   {
     id: "mock-5",
@@ -77,12 +77,12 @@ const MOCK_JOBS = [
     company_name: "QualityWorks",
     company_location: "Hanoi, VN",
     logo_url: "/images/j5.png",
-    type_of_employment: "Full-time",
-    experience: "2+ years",
-    experience_level: "Junior",
+    type_of_employment: "Full Time",
+    experience: "1 - 2 Years",
+    experience_level: "Entry Level",
     description: "Ensure product quality through testing and automation.",
     skills: ["Selenium", "Testing"],
-    salary_range: "$700 - $1000",
+    salary_range: "$40k -55k",
   },
   {
     id: "mock-6",
@@ -90,12 +90,12 @@ const MOCK_JOBS = [
     company_name: "Prodify",
     company_location: "Hanoi, VN",
     logo_url: "/images/j6.png",
-    type_of_employment: "Full-time",
-    experience: "4+ years",
-    experience_level: "Mid",
+    type_of_employment: "Full Time",
+    experience: "2 - 6 Years",
+    experience_level: "Mid Level",
     description: "Lead product direction and roadmap.",
     skills: ["Roadmapping", "Stakeholder Management"],
-    salary_range: "$1200 - $1800",
+    salary_range: "$85k - 115k",
   },
   {
     id: "mock-7",
@@ -103,12 +103,12 @@ const MOCK_JOBS = [
     company_name: "Insight Labs",
     company_location: "Ho Chi Minh City, VN",
     logo_url: "/images/j7.png",
-    type_of_employment: "Full-time",
-    experience: "3+ years",
-    experience_level: "Mid",
+    type_of_employment: "Full Time",
+    experience: "2 - 6 Years",
+    experience_level: "Mid Level",
     description: "Analyze data and build predictive models.",
     skills: ["Python", "ML"],
-    salary_range: "$1400 - $2000",
+    salary_range: "$85k - 115k",
   },
   {
     id: "mock-8",
@@ -116,12 +116,12 @@ const MOCK_JOBS = [
     company_name: "Appify",
     company_location: "Da Nang, VN",
     logo_url: "/images/j8.png",
-    type_of_employment: "Contract",
-    experience: "2+ years",
-    experience_level: "Junior",
+    type_of_employment: "Freelance",
+    experience: "1 - 2 Years",
+    experience_level: "Entry Level",
     description: "Develop mobile apps using React Native.",
     skills: ["React Native", "iOS", "Android"],
-    salary_range: "$900 - $1300",
+    salary_range: "$55k - 85k",
   },
   {
     id: "mock-9",
@@ -129,12 +129,12 @@ const MOCK_JOBS = [
     company_name: "InfraHub",
     company_location: "Remote",
     logo_url: "/images/j9.png",
-    type_of_employment: "Full-time",
-    experience: "5+ years",
-    experience_level: "Senior",
+    type_of_employment: "Remote",
+    experience: "Over 6 Years",
+    experience_level: "Senior Level",
     description: "Manage servers and networks.",
     skills: ["Linux", "Networking"],
-    salary_range: "$1100 - $1600",
+    salary_range: "$115k - 145k",
   },
   {
     id: "mock-10",
@@ -142,12 +142,12 @@ const MOCK_JOBS = [
     company_name: "DocsCo",
     company_location: "Hanoi, VN",
     logo_url: "/images/l1.png",
-    type_of_employment: "Part-time",
-    experience: "1+ years",
-    experience_level: "Junior",
+    type_of_employment: "Part Time",
+    experience: "Under 1 Year",
+    experience_level: "Entry Level",
     description: "Write technical documentation and guides.",
     skills: ["Writing", "Markdown"],
-    salary_range: "$500 - $800",
+    salary_range: "$40k -55k",
   },
   {
     id: "mock-11",
@@ -155,12 +155,12 @@ const MOCK_JOBS = [
     company_name: "SalesTech",
     company_location: "Ho Chi Minh City, VN",
     logo_url: "/images/l2.png",
-    type_of_employment: "Full-time",
-    experience: "3+ years",
-    experience_level: "Mid",
+    type_of_employment: "Full Time",
+    experience: "2 - 6 Years",
+    experience_level: "Mid Level",
     description: "Support sales with technical expertise.",
     skills: ["Pre-sales", "Demos"],
-    salary_range: "$900 - $1400",
+    salary_range: "$85k - 115k",
   },
   {
     id: "mock-12",
@@ -168,12 +168,12 @@ const MOCK_JOBS = [
     company_name: "HappyClients",
     company_location: "Da Nang, VN",
     logo_url: "/images/l3.png",
-    type_of_employment: "Full-time",
-    experience: "2+ years",
-    experience_level: "Junior",
+    type_of_employment: "Full Time",
+    experience: "1 - 2 Years",
+    experience_level: "Entry Level",
     description: "Ensure customers achieve value from our product.",
     skills: ["Support", "Onboarding"],
-    salary_range: "$600 - $900",
+    salary_range: "$55k - 85k",
   },
 ];
 
@@ -247,28 +247,27 @@ export default function JobsPage() {
     setOffset(0);
   };
 
-  // Filtering logic
-  let filteredJobs = allJobs.filter((job: any) => {
-    for (const [filterName, selectedValues] of Object.entries(selectedFilters) as [string, string[]][]) {
-      if (selectedValues.length > 0 && !selectedValues.includes(job[filterName])) return false;
-    }
-    return true;
-  });
-
-  // Search filtering
-  const filteredJobsBySearch = allJobs.filter((job: any) => {
+  // Combined filtering logic (search + filter checkboxes)
+  let jobsToDisplay = allJobs.filter((job: any) => {
+    // Search filtering
     let isTitleMatch = true;
     let isLocationMatch = true;
     let isTypeMatch = true;
     if (searchQueries.title) isTitleMatch = (job.title || "").toLowerCase().includes(searchQueries.title.toLowerCase());
     if (searchQueries.location) isLocationMatch = (job.company_location || "").toLowerCase().includes(searchQueries.location.toLowerCase());
     if (searchQueries.type) isTypeMatch = (job.type_of_employment || "").toLowerCase().includes(searchQueries.type.toLowerCase());
-    return isTitleMatch && isLocationMatch && isTypeMatch;
-  });
 
-  let jobsToDisplay = allJobs;
-  if (searchQueries.title || searchQueries.location || searchQueries.type) jobsToDisplay = filteredJobsBySearch;
-  else if (selectedFilters && Object.keys(selectedFilters).length > 0) jobsToDisplay = filteredJobs;
+    // Filter checkbox logic
+    let matchesFilters = true;
+    for (const [filterName, selectedValues] of Object.entries(selectedFilters) as [string, string[]][]) {
+      if (selectedValues.length > 0 && !selectedValues.includes(job[filterName])) {
+        matchesFilters = false;
+        break;
+      }
+    }
+
+    return isTitleMatch && isLocationMatch && isTypeMatch && matchesFilters;
+  });
 
   // counts
   const counts: any = {};
