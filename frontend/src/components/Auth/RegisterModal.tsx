@@ -75,14 +75,17 @@ export default function RegisterModal({
         </h2>
 
         {/* ---------------- GOOGLE REGISTER ---------------- */}
-        <div className="mb-8 text-center">
-          
-
+        <div className="mb-8">
           <GoogleRegisterButton
+            fullWidth={true}
             onSuccess={(data: any) => {
-              alert("Google Register successful!");
               console.log("Google Registered user:", data);
+              // Close modal and user avatar should appear automatically
               onClose();
+              // Show success message
+              setTimeout(() => {
+                alert("Google sign-up successful! Welcome to JobNest!");
+              }, 100);
             }}
           />
         </div>

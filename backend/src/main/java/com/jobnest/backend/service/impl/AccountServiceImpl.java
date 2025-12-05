@@ -55,7 +55,9 @@ public class AccountServiceImpl implements AccountService {
             acc.setRole(Account.Role.CANDIDATE);
         }
         
-        acc.setStatus(Account.AccountStatus.PENDING);
+        // TODO: Change back to PENDING in production
+        // For testing: Auto-activate accounts without email verification
+        acc.setStatus(Account.AccountStatus.ACTIVE);
 
         Account saved = userRepository.save(acc);
         

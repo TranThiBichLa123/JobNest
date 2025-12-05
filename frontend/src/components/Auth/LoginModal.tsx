@@ -4,6 +4,7 @@ import Image from "next/image";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useState, useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import GoogleRegisterButton from "@/components/Auth/GoogleRegisterButton";
 
 export default function LoginModal({
   show,
@@ -64,11 +65,14 @@ export default function LoginModal({
         )}
 
         {/* Google */}
-        <div className="mb-6 gap-3">
-          <button className="w-full border dark:border-gray-600 rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">
-            <Image src="/images/gg.png" width={22} height={22} alt="Google" />
-            <span>with Google account</span>
-          </button>
+        <div className="mb-6">
+          <GoogleRegisterButton
+            fullWidth={true}
+            onSuccess={(data) => {
+              console.log("Google login successful:", data);
+              onClose();
+            }}
+          />
         </div>
 
         <div className="text-center text-gray-500 dark:text-gray-400 my-3">or login by email</div>

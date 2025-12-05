@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
+import api from "@/lib/axios";
 
 export default function ForgotPasswordModal({
   show,
@@ -9,6 +11,40 @@ export default function ForgotPasswordModal({
   show: boolean;
   onClose: () => void;
 }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      setError("Please enter your email address");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      await api.post("/auth/password/forgot", { email });
+      setMessage("Password reset link has been sent! Please check your email inbox (and spam folder). You can also check the backend console for the reset link.");
+      setEmail("");
+      
+      // Auto close after 5 seconds
+      setTimeout(() => {
+        onClose();
+        setMessage("");
+      }, 5000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to send reset link. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!show) return null;
 
   return (
@@ -46,19 +82,44 @@ export default function ForgotPasswordModal({
           Enter your email below. We will send you a password reset link.
         </p>
 
-        {/* INPUT EMAIL */}
-        <div className="mb-6">
-          <label className="font-medium">Email</label>
-          <input
-            type="email"
-            className="w-full border rounded-lg px-4 py-2 mt-1 outline-none focus:border-blue-500"
-          />
-        </div>
+        {/* Success Message */}
+        {message && (
+          <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-200 rounded-lg text-sm">
+            {message}
+          </div>
+        )}
 
-        {/* BUTTON */}
-        <button className="w-full bg-cyan-700 hover:bg-cyan-800 text-white py-2 rounded-lg">
-          Send Reset Link
-        </button>
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* FORM */}
+        <form onSubmit={handleSubmit}>
+          {/* INPUT EMAIL */}
+          <div className="mb-6">
+            <label className="font-medium dark:text-white">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your-email@example.com"
+              className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 mt-1 outline-none focus:border-cyan-500"
+              disabled={loading}
+            />
+          </div>
+
+          {/* BUTTON */}
+          <button 
+            type="submit"
+            disabled={loading}
+            className="w-full bg-cyan-700 hover:bg-cyan-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 rounded-lg transition-colors"
+          >
+            {loading ? "Sending..." : "Send Reset Link"}
+          </button>
+        </form>
       </div>
     </div>
   );

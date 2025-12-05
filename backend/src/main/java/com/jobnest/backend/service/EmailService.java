@@ -147,7 +147,7 @@ public class EmailService {
                         <p>Hi there,</p>
                         <p>We received a request to reset your JobNest password. Click the button below to create a new password:</p>
                         <p style="text-align: center;">
-                            <a href="%s" class="button">Reset Password</a>
+                            <a href="%s" class="button" style="color: white !important;">Reset Password</a>
                         </p>
                         <p>Or copy and paste this link into your browser:</p>
                         <p style="word-break: break-all; color: #0e7490;">%s</p>

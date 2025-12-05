@@ -10,6 +10,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   refreshToken: () => Promise<void>;
+  setUser: (user: User | null) => void;
   isLoading: boolean;
 }
 
@@ -84,35 +85,43 @@ export default function AuthProvider({ children }: any) {
   // Load user on mount
   async function loadUser() {
     const token = localStorage.getItem("accessToken");
+    const refreshTok = localStorage.getItem("refreshToken");
+    
+    console.log("🔍 Loading user... AccessToken exists:", !!token, "RefreshToken exists:", !!refreshTok);
+    
     if (token) {
       attachToken();
 
       try {
+        console.log("📡 Fetching user from /auth/me...");
         const res = await api.get<User>("/auth/me");
+        console.log("✅ User loaded successfully:", res.data);
         setUser(res.data);
       } catch (error: any) {
-        // Only log non-401 errors (401 is expected when not logged in)
-        if (error.response?.status !== 401) {
-          console.error("Failed to load user:", error);
-        }
+        console.log("❌ Failed to fetch user, status:", error.response?.status);
         
         // Try to refresh token if we have one
-        const refreshTok = localStorage.getItem("refreshToken");
         if (refreshTok) {
           try {
+            console.log("🔄 Attempting to refresh token...");
             await refreshToken();
+            console.log("✅ Token refreshed successfully");
           } catch (refreshError) {
+            console.error("❌ Refresh failed, clearing tokens");
             // Refresh failed, clear tokens
             localStorage.removeItem("accessToken");
             localStorage.removeItem("refreshToken");
             delete api.defaults.headers.common["Authorization"];
           }
         } else {
+          console.log("⚠️ No refresh token, clearing access token");
           // No refresh token, clear access token
           localStorage.removeItem("accessToken");
           delete api.defaults.headers.common["Authorization"];
         }
       }
+    } else {
+      console.log("ℹ️ No access token found, user not logged in");
     }
     setIsLoading(false);
   }
@@ -122,7 +131,7 @@ export default function AuthProvider({ children }: any) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, refreshToken, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, refreshToken, setUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

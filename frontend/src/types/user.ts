@@ -6,7 +6,7 @@ export interface User {
   username: string;
   email: string;
   role: UserRole;
-  avatar_url?: string;
+  avatarUrl?: string;  // Changed from avatar_url to match backend camelCase
   status: AccountStatus;
   last_login_at?: string;
   created_at: string;

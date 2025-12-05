@@ -14,8 +14,30 @@ import { useRouter, usePathname } from "next/navigation";
 import RegisterModal from "@/components/Auth/RegisterModal";
 import ForgotPasswordModal from "@/components/Auth/ForgotPasswordModal";
 import LoginModal from "@/components/Auth/LoginModal";
+import GoogleRegisterButton from "@/components/Auth/GoogleRegisterButton";
 import { useAuthModal } from "@/context/AuthModalContext";
+import UserMenuDropdown from "./UserMenuDropdown";
 
+// Helper function to generate avatar URL from email using UI Avatars
+function getAvatarUrl(avatarUrl: string | undefined, email: string | undefined, username: string | undefined): string {
+    console.log('Avatar URL from user object:', avatarUrl);
+    console.log('Email:', email);
+    console.log('Username:', username);
+    
+    // If user has uploaded avatar (including Google avatar), use it
+    if (avatarUrl && avatarUrl.trim() !== '') {
+        console.log('Using provided avatar URL:', avatarUrl);
+        return avatarUrl;
+    }
+    
+    // Generate avatar from username or email
+    const name = username || (email ? email.split('@')[0] : 'User');
+    const avatarApiUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0e7490&color=fff&size=128&bold=true`;
+    
+    console.log('Generated fallback avatar URL:', avatarApiUrl);
+    
+    return avatarApiUrl;
+}
 
 
 type Props = {
@@ -101,27 +123,21 @@ const Nav = ({ openNav }: Props) => {
                         <button className="px-8 py-2.5 text-sm text-white hidden sm:block cursor-pointer rounded-lg bg-cyan-700 hover:bg-cyan-900 transition-all duration-300">
                             Job Post
                         </button>
-                        {/* Login/register button */}
-                        <button
-                            onClick={() => {
-                                if (!user) {
-                                    setShowPopup(true);   // mở popup login
-                                } else {
-                                    router.push("/profile");
-                                }
-                            }}
-                            className="p-1 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-900 transition-all duration-300"
-                        >
-                            {user?.avatar_url ? (
-                                <img
-                                    src={user.avatar_url}
-                                    alt="avatar"
-                                    className="w-8 h-8 rounded-full object-cover"
-                                />
-                            ) : (
+                        
+                        {/* User Avatar with Dropdown or Login Icon */}
+                        {user ? (
+                            <UserMenuDropdown 
+                                avatarUrl={getAvatarUrl(user.avatarUrl, user.email, user.username)}
+                                username={user.username}
+                            />
+                        ) : (
+                            <button
+                                onClick={() => setShowPopup(true)}
+                                className="p-1 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-900 transition-all duration-300"
+                            >
                                 <MdAccountCircle className="w-7 h-7 text-cyan-700 dark:text-white" />
-                            )}
-                        </button>
+                            </button>
+                        )}
 
 
                         {/* Theme toggler */}
@@ -143,16 +159,15 @@ const Nav = ({ openNav }: Props) => {
                                 >
                                     <h2 className="text-lg font-semibold mb-4 text-center">Job seeker login</h2>
 
-                                    <div className="flex justify-between mb-4">
-                                        <button className="border px-3 py-2 flex-1 mx-1 rounded flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                            <Image
-                                                src="/images/gg.png"
-                                                alt="Google"
-                                                width={20}
-                                                height={20}
-                                            />
-                                            <span>Google</span>
-                                        </button>
+                                    <div className="mb-4">
+                                        <GoogleRegisterButton 
+                                            role="CANDIDATE"
+                                            fullWidth={true}
+                                            onSuccess={(data) => {
+                                                setShowPopup(false);
+                                                // User is now logged in, state will persist
+                                            }}
+                                        />
                                     </div>
 
                                     <div className="space-y-3">
