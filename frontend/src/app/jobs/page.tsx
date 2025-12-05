@@ -380,46 +380,61 @@ export default function JobsPage() {
             <div className="md:col-span-2 mt-5 md:mt-0 h-fit md:sticky top-0">
 
 
-              <div className="flex-center-between mt-3">
-                <div className="flex-align-center gap-4" onClick={() => setIsFilterMenuOpen(true)}>
+              <div className="flex items-center justify-between mt-3 w-full">
+
+                {/* Left side */}
+                <div
+                  className="flex items-center gap-4 cursor-pointer"
+                  onClick={() => setIsFilterMenuOpen(true)}
+                >
                   <div className="md:hidden icon-box bg-white dark:bg-dark-card card-shadow dark:shadow-none card-bordered !rounded-md">
                     <BiFilterAlt />
                   </div>
-                  <h3 className="text-sm dark:text-white"><span className="text-muted dark:text-gray-400">Showing: </span>{jobsToDisplay.length} Jobs</h3>
+
+                  <h3 className="text-sm dark:text-white">
+                    <span className="text-muted dark:text-gray-400">Showing: </span>
+                    {jobsToDisplay.length} Jobs
+                  </h3>
                 </div>
-                <div className="flex-align-center gap-2">
+
+                {/* Right side */}
+                <div className="flex items-center gap-2">
                   <p className="text-sm dark:text-gray-300">Sort by:</p>
-                  <div className="flex-align-center gap-2">
+
+                  <div className="flex items-center gap-2 cursor-pointer">
                     <span className="text-sm text-primary">Posted Recently</span>
                     <FiChevronDown className="dark:text-gray-300" />
                   </div>
                 </div>
+
               </div>
 
-              <div className="mt-4">
+
+              <div className="mt-3">
                 <JobList jobs={currentJobs} loading={loading} />
               </div>
 
               {!loading && (
-                <div className="mt-5">
-                  <ReactPaginate
-                    breakLabel="..."
-                    nextLabel={<FiChevronsRight />}
-                    onPageChange={handlePageClick}
-                    pageRangeDisplayed={2}
-                    pageCount={pageCount}
-                    previousLabel={<FiChevronsLeft />}
-                    renderOnZeroPageCount={null}
-                    containerClassName="wb-pagination"
-                    pageClassName="pagination-item"
-                    pageLinkClassName="pagination-link"
-                    activeClassName="pagination-link-active"
-                    previousLinkClassName="prev"
-                    nextLinkClassName="next"
-                    disabledClassName="disabled"
-                  />
-                </div>
-              )}
+  <div className="mt-5 flex justify-center">
+    <ReactPaginate
+      breakLabel="..."
+      nextLabel={<FiChevronsRight />}
+      onPageChange={handlePageClick}
+      pageRangeDisplayed={2}
+      pageCount={pageCount}
+      previousLabel={<FiChevronsLeft />}
+      renderOnZeroPageCount={null}
+      containerClassName="pagination"
+      pageClassName="page-item"
+      pageLinkClassName="page-link"
+      activeClassName="active"
+      previousLinkClassName="nav-btn"
+      nextLinkClassName="nav-btn"
+      disabledClassName="disabled"
+    />
+  </div>
+)}
+
             </div>
           </div>
         </div>

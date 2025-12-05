@@ -1,6 +1,6 @@
 export const filters = [
   {
-    label: "type of employment",
+    label: "Type of Employment",
     name: "type_of_employment",
     filters: [
       "Full Time",

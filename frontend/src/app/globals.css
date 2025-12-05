@@ -5,3 +5,56 @@
     }
 }
 @custom-variant dark (&:where(.dark, .dark *));
+/* Pagination Container */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 12px 0;
+}
+
+/* Page numbers */
+.page-item {
+  list-style: none;
+}
+
+.page-link {
+  font-size: 16px;
+  color: #64748B; /* slate-500 */
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Hover effect */
+.page-link:hover {
+  color: #164E63; /* cyan-900 */
+}
+
+/* Active Page */
+.active .page-link {
+  background: #0E7490; /* cyan-700 */
+  color: white;
+  border-radius: 9999px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 10px rgba(14, 116, 144, 0.4); /* glow theo cyan-700 */
+}
+
+/* Previous / Next arrows */
+.nav-btn {
+  color: #A5F3FC; /* cyan-200 */
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nav-btn:hover {
+  color: #164E63; /* cyan-900 */
+}
+
+/* Disabled arrows */
+.disabled .nav-btn {
+  opacity: 0.3;
+  cursor: default;
+}

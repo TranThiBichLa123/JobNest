@@ -10,7 +10,7 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { MdAccountCircle } from "react-icons/md";
 import { AuthContext } from "@/context/AuthContext";
 import { useContext } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import RegisterModal from "@/components/Auth/RegisterModal";
 import ForgotPasswordModal from "@/components/Auth/ForgotPasswordModal";
 import LoginModal from "@/components/Auth/LoginModal";
@@ -33,6 +33,7 @@ const Nav = ({ openNav }: Props) => {
     const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     const router = useRouter();
+    const pathname = usePathname();
 
     // 🔥 LẤY USER TỪ AUTH CONTEXT
     const auth = useContext(AuthContext);
@@ -75,8 +76,15 @@ const Nav = ({ openNav }: Props) => {
                     {/* NAVLINKS */}
                     <div className='hidden lg:flex items-center space-x-10'>
                         {NavLinks.map((link) => {
-                            return <Link key={link.id} href={link.url} className="text-base hover:text-cyan-700 dark:hovertext-cyan-200 font-medium transition-all duration-200">
-                                <p> {link.label}</p>
+                            const isActive = pathname === link.url;
+                            return <Link 
+                                key={link.id} 
+                                href={link.url} 
+                                className={`text-base hover:text-cyan-700 dark:hover:text-cyan-200 font-medium transition-all duration-200 ${
+                                    isActive ? 'text-cyan-800 dark:text-white' : ''
+                                }`}
+                            >
+                                <p>{link.label}</p>
                             </Link>
                         })}
                     </div>
