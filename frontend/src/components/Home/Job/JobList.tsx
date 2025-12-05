@@ -1,85 +1,126 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+
 import Link from "next/link";
-import JobSkillTags from "./JobSkillTags";
-import { FaBookmark } from "react-icons/fa";
+import { FiBookmark } from "react-icons/fi";
 import { motion } from "framer-motion";
-import Image from "next/image";
+
 const JobList = ({ jobs, loading }: any) => {
   return !loading ? (
     <>
-      {jobs.length > 0 ? (
+      {jobs?.length > 0 ? (
         <>
-          {jobs?.map((job: any) => (
+          {jobs.map((job: any) => (
             <motion.div
-              className="card p-4 mt-3 group"
-              key={job?.id}
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.6, opacity: 0 }}
+              key={job.id}
+              className="
+                bg-white dark:bg-[var(--dark-card)]
+                border border-slate-200 dark:border-slate-700
+                rounded-xl shadow-sm p-5 mt-5 transition-colors
+              "
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
             >
-              <div className="flex flex-col sm:flex-row gap-3 justify-between">
-                <div className="flex-align-center gap-3">
+              {/* Top Row */}
+              <div className="flex justify-between items-start gap-4">
+                {/* Logo + Info */}
+                <div className="flex items-start gap-4">
                   <img
-                    src={job?.logo_url || "/images/a.png"}
-                    alt={job?.company_name || "company logo"}
-                    className="w-14 rounded-lg"
+                    src={job.logo_url || "/images/a.png"}
+                    alt="logo"
+                    className="w-12 h-12 rounded-lg object-cover"
                   />
+
                   <div>
-                        <Link href={`/jobs/${job?.id}`} className="group-hover:text-primary transition-a">
-                          <h1 className="text-xl font-semibold">{job?.title}</h1>
-                        </Link>
-                        <p className="text-sm">
-                          {job?.company_name} <span className="text-xl mx-2">.</span>3 days ago
-                        </p>
-                        <div className="mt-1">
-                          <span className="text-sm text-muted bg-slate-200 rounded-sm px-2 py-[1px]">{job?.category}</span>
-                        </div>
+                    <Link
+                      href={`/jobs/${job.id}`}
+                      className="hover:text-primary transition"
+                    >
+                      <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                        {job.title}
+                      </h2>
+                    </Link>
+
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      {job.company_name} <span className="mx-2">·</span> 3 days ago
+                    </p>
+
+                    {/* Tags */}
+                    <div className="flex items-center gap-2 mt-3 flex-wrap text-sm">
+                      <span className="px-3 py-1 bg-slate-200 dark:bg-[var(--hover-color)] rounded-md text-gray-700 dark:text-gray-200">
+                        {job.type_of_employment}
+                      </span>
+                      <span className="px-3 py-1 bg-slate-200 dark:bg-[var(--hover-color)] rounded-md text-gray-700 dark:text-gray-200">
+                        {job.experience}
+                      </span>
+                      <span className="px-3 py-1 bg-slate-200 dark:bg-[var(--hover-color)] rounded-md text-gray-700 dark:text-gray-200">
+                        {job.experience_level}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <button className="bg-slate-100 px-3 py-1 rounded-md flex-align-center gap-x-2 flex-shrink-0 text-muted hover:bg-slate-200 dark:bg-hover-color dark:hover:bg-[#252532]">
-                    <span>Save Job</span>
-                    <FaBookmark />
-                  </button>
+                {/* Save Job */}
+                <button
+                  className="
+                    flex items-center gap-2 bg-slate-100 
+                    dark:bg-[var(--hover-color)]
+                    text-gray-600 dark:text-gray-200
+                    px-3 py-1.5 rounded-md hover:bg-slate-200
+                    dark:hover:bg-[#2f3442] transition text-sm
+                  "
+                >
+                  Save Job <FiBookmark />
+                </button>
+              </div>
+
+              {/* Description */}
+              <p className="mt-4 text-gray-600 dark:text-gray-300 leading-relaxed">
+                {job.description?.slice(0, 250)}...
+              </p>
+
+              {/* Bottom Section */}
+              <div className="flex flex-wrap justify-between items-center mt-6">
+                {/* Salary & Applied */}
+                <div className="flex items-center gap-6">
+                  <p className="text-gray-800 dark:text-white font-medium">
+                    {job.salary_range}
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {" "}
+                      / month
+                    </span>
+                  </p>
+
+                  <p className="text-gray-700 dark:text-gray-300">
+                    54{" "}
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      People Applied
+                    </span>
+                  </p>
                 </div>
-              </div>
 
-              <div className="flex-align-center gap-2 mt-2 flex-wrap">
-                <span className="text-muted bg-slate-200 rounded-sm px-2 py-[1px] dark:bg-hover-color sm:text-sm">
-                  {job?.type_of_employment}
-                </span>
-                <span className="text-muted bg-slate-200 rounded-sm px-2 py-[1px] dark:bg-hover-color sm:text-sm">
-                  {job?.experience}
-                </span>
-                <span className="text-muted bg-slate-200 rounded-sm px-2 py-[1px] dark:bg-hover-color sm:text-sm">
-                  {job?.experience_level}
-                </span>
-              </div>
-
-              <div className="my-3">
-                <p className="text-sm">{job?.description?.slice(0, 350)}...</p>
-              </div>
-
-              <JobSkillTags skills={job?.skills} />
-
-              <div className="flex flex-wrap sm:flex-nowrap md:flex-center-between mt-4">
-                <div className="flex-align-center gap-4">
-                  <h1>
-                    {job?.salary_range} / <span className="text-sm text-muted">month</span>
-                  </h1>
-                  <h1>
-                    54 <span className="text-sm text-muted">People Applied</span>
-                  </h1>
-                </div>
-
-                <div className="flex-align-center gap-x-4 mt-4 sm:mt-0">
-                  <button className="btn flex-shrink-0 bg-slate-100 hover:bg-slate-200 text-muted dark:bg-hover-color dark:hover:bg-[#252532]">
-                    message
+                {/* Buttons */}
+                <div className="flex items-center gap-3 mt-4 sm:mt-0">
+                  <button
+                    className="
+                      bg-slate-100 dark:bg-[var(--hover-color)]
+                      text-gray-700 dark:text-gray-200
+                      px-5 py-2 rounded-md
+                      hover:bg-slate-200 dark:hover:bg-[#2f3442]
+                      transition
+                    "
+                  >
+                    Message
                   </button>
-                  <Link href="/apply" className="btn btn-primary flex-shrink-0">
-                    apply now
+
+                  <Link
+                    href="/apply"
+                    className="
+                      bg-cyan-700 hover:bg-cyan-800 text-white
+                      px-6 py-2 rounded-md transition font-medium
+                    "
+                  >
+                    Apply Now
                   </Link>
                 </div>
               </div>
@@ -94,21 +135,20 @@ const JobList = ({ jobs, loading }: any) => {
               alt="no results"
               className="mx-auto object-contain h-[350px] w-[350px]"
             />
-            <h1 className="text-center mt-5 text-5xl opacity-60">Oops! No jobs found</h1>
+            <h1 className="text-center mt-5 text-5xl opacity-60">
+              Oops! No jobs found
+            </h1>
           </div>
         </div>
-
-
-
-
-
-
       )}
     </>
   ) : (
     <>
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="card p-4 mt-3 h-48 bg-slate-200 dark:bg-hover-color animate-pulse rounded-lg" />
+        <div
+          key={i}
+          className="rounded-xl bg-slate-200 dark:bg-[var(--hover-color)] h-40 mt-4 animate-pulse"
+        />
       ))}
     </>
   );

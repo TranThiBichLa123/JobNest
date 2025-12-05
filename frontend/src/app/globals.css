@@ -58,3 +58,54 @@
   opacity: 0.3;
   cursor: default;
 }
+
+:root {
+  --dark-card: #1a1f2b;
+  --hover-color: #2a2f3b;
+}
+
+.dark {
+  --dark-card: #131820;
+  --hover-color: #232837;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+  position: relative;
+  background-color: white;
+  cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #0e7490; /* cyan-700 */
+  border-color: #0e7490;
+}
+
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -60%) rotate(45deg);
+}
+
+.dark input[type="checkbox"] {
+  background-color: #1a1f2b; /* dark background */
+}
+
+.dark input[type="checkbox"]:checked {
+  background-color: #06b6d4; /* cyan-500 */
+  border-color: #06b6d4;
+}
+
+.dark input[type="checkbox"]:checked::after {
+  border-color: #1a1f2b; /* dark checkmark */
+}
