@@ -8,6 +8,7 @@ import Footer from "../components/Home/Footer/Footer";
 import ScrollToTop from "../components/Helper/ScrollToTop";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import AuthProvider from "../context/AuthContext";
+import { AuthModalProvider } from "../context/AuthModalContext";
 import { Network } from 'lucide-react';
 
 const App = () => {
@@ -40,12 +41,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* Bên trong là AuthProvider + UI */}
           <AuthProvider>
-            <Provider>
-              <ResponsiveNav />
-              {children}
-              <Footer />
-              <ScrollToTop />
-            </Provider>
+            <AuthModalProvider>
+              <Provider>
+                <ResponsiveNav />
+                {children}
+                <Footer />
+                <ScrollToTop />
+              </Provider>
+            </AuthModalProvider>
           </AuthProvider>
         </GoogleOAuthProvider>
 

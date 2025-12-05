@@ -4,8 +4,21 @@
 import Link from "next/link";
 import { FiBookmark } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 const JobList = ({ jobs, loading }: any) => {
+  const auth = useContext(AuthContext);
+  const { openLoginModal } = useAuthModal();
+
+  const handleApplyClick = (e: React.MouseEvent) => {
+    if (!auth?.user) {
+      e.preventDefault();
+      openLoginModal();
+    }
+  };
+
   return !loading ? (
     <>
       {jobs?.length > 0 ? (
@@ -115,6 +128,7 @@ const JobList = ({ jobs, loading }: any) => {
 
                   <Link
                     href="/apply"
+                    onClick={handleApplyClick}
                     className="
                       bg-cyan-700 hover:bg-cyan-800 text-white
                       px-6 py-2 rounded-md transition font-medium

@@ -17,7 +17,7 @@ public class GoogleConfig {
                 GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory.getDefaultInstance()
         )
-        .setAudience(Collections.singletonList("798075741546-raai0oeb4qd919nsrgvjmksber9o62go.apps.googleusercontent.com"))
+        .setAudience(Collections.singletonList("396832074460-rmct3bman78nf83bo6l79camt3sebgof.apps.googleusercontent.com"))
         .build();
     }
 }

@@ -202,10 +202,11 @@ export default function JobsPage() {
 
   // useMemo to prevent allJobs from creating new array reference every render
   const allJobs = useMemo(() => {
-    if (!Array.isArray(jobs)) return [];
-    if (!loading && jobs.length === 0) return mockJobs;
+    if (!Array.isArray(jobs)) return mockJobs;
+    // Show mock jobs when API returns empty or is still loading with no data
+    if (jobs.length === 0) return mockJobs;
     return jobs;
-  }, [jobs, loading, mockJobs]);
+  }, [jobs, mockJobs]);
 
   // Get current date formatted
   const getCurrentDate = () => {
@@ -417,6 +418,22 @@ export default function JobsPage() {
 
               <div className="mt-3">
                 <JobList jobs={currentJobs} loading={loading} />
+                {!loading && jobsToDisplay.length === 0 && (
+                  <div className="text-center py-10">
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">
+                      No jobs found matching your filters.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setSelectedFilters({});
+                        setSearchQueries({ title: "", location: "" });
+                      }}
+                      className="mt-4 px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+                    >
+                      Clear All Filters
+                    </button>
+                  </div>
+                )}
               </div>
 
               {!loading && (

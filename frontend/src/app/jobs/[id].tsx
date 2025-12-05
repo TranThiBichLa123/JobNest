@@ -8,14 +8,27 @@ import RelatedJobs from "@/components/Home/Job/RelatedJobs";
 import { useSearchParams, useRouter } from "next/navigation";
 import useFetch from "@/hooks/useFetch";
 import { server } from "@/lib/config";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 const SingleJob = () => {
   const router = useRouter();
+  const auth = useContext(AuthContext);
+  const { openLoginModal } = useAuthModal();
+  
   // In App Router, read id from search params or path - try searchParams
   const searchParams = useSearchParams();
   const id = searchParams?.get("id");
 
   const { data: job, loading } = useFetch(`${server}/api/jobs/${id}`);
+
+  const handleApplyClick = (e: React.MouseEvent) => {
+    if (!auth?.user) {
+      e.preventDefault();
+      openLoginModal();
+    }
+  };
 
   const {
     title,
@@ -131,7 +144,11 @@ const SingleJob = () => {
                 ))}
               </div>
               <div className="flex justify-end mt-3">
-                <Link href="/jobs/apply" className="btn btn-primary flex-shrink-0">
+                <Link 
+                  href="/jobs/apply" 
+                  onClick={handleApplyClick}
+                  className="btn btn-primary flex-shrink-0"
+                >
                   apply now
                 </Link>
               </div>

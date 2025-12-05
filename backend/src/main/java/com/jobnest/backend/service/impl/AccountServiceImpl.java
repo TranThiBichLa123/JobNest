@@ -3,11 +3,14 @@ package com.jobnest.backend.service.impl;
 import com.jobnest.backend.dto.*;
 import com.jobnest.backend.entities.Account;
 import com.jobnest.backend.entities.EmailVerification;
+import com.jobnest.backend.entities.PasswordResetToken;
 import com.jobnest.backend.repository.UserRepository;
 import com.jobnest.backend.repository.EmailVerificationRepository;
+import com.jobnest.backend.repository.PasswordResetTokenRepository;
 import com.jobnest.backend.service.AccountService;
 import com.jobnest.backend.service.JwtService;
 import com.jobnest.backend.service.RefreshTokenService;
+import com.jobnest.backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,9 +25,11 @@ public class AccountServiceImpl implements AccountService {
 
     private final UserRepository userRepository;
     private final EmailVerificationRepository emailVerificationRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -172,18 +177,38 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public void sendPasswordResetEmail(String email) {
-        findByEmail(email); // Validate account exists
+        Account account = findByEmail(email);
         
-        // TODO: Generate reset token and send email
-        // For now, just log
-        System.out.println("Password reset email would be sent to: " + email);
+        // Create reset token
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setAccount(account);
+        resetToken.setToken(UUID.randomUUID().toString());
+        resetToken.setExpiresAt(LocalDateTime.now().plusHours(1)); // 1 hour expiry
+        
+        passwordResetTokenRepository.save(resetToken);
+        
+        // Send reset email
+        emailService.sendPasswordResetEmail(account.getEmail(), resetToken.getToken());
     }
 
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequest req) {
-        // TODO: Verify token and reset password
-        System.out.println("Password reset with token: " + req.getToken());
+        PasswordResetToken resetToken = passwordResetTokenRepository
+            .findByTokenAndIsUsedFalse(req.getToken())
+            .orElseThrow(() -> new RuntimeException("Invalid or expired reset token"));
+        
+        if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Reset token has expired");
+        }
+        
+        Account account = resetToken.getAccount();
+        account.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
+        userRepository.save(account);
+        
+        // Mark token as used
+        resetToken.setIsUsed(true);
+        passwordResetTokenRepository.save(resetToken);
     }
 
     @Override
@@ -200,8 +225,8 @@ public class AccountServiceImpl implements AccountService {
         
         emailVerificationRepository.save(verification);
         
-        // TODO: Send email
-        System.out.println("Email verification sent to: " + account.getEmail());
+        // Send verification email
+        emailService.sendVerificationEmail(account.getEmail(), verification.getToken());
     }
 
     @Override

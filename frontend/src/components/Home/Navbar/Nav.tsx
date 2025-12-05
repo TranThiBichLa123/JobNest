@@ -14,6 +14,7 @@ import { useRouter, usePathname } from "next/navigation";
 import RegisterModal from "@/components/Auth/RegisterModal";
 import ForgotPasswordModal from "@/components/Auth/ForgotPasswordModal";
 import LoginModal from "@/components/Auth/LoginModal";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 
 
@@ -29,8 +30,9 @@ const Nav = ({ openNav }: Props) => {
     const [showPopupSmall, setShowPopup] = useState(false);
     const [showPopupLarge, setShowPopupLarge] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [showRegister, setShowRegister] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
+    
+    const { showLoginModal, showRegisterModal, openLoginModal, openRegisterModal, closeLoginModal, closeRegisterModal } = useAuthModal();
 
     const router = useRouter();
     const pathname = usePathname();
@@ -156,16 +158,16 @@ const Nav = ({ openNav }: Props) => {
                                     <div className="space-y-3">
                                         <button
                                             onClick={() => {
-                                                setShowPopupLarge(true);
+                                                setShowPopup(false);
+                                                openLoginModal();
                                             }}
                                             className="w-full border py-2 rounded flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <span>Login</span>
                                         </button>
                                         <button
                                             onClick={() => {
-                                                setShowPopup(false);        // tắt popup nhỏ
-                                                setShowPopupLarge(false);    // tắt popup login lớn (nếu đang mở)
-                                                setShowRegister(true); // mở popup đăng ký
+                                                setShowPopup(false);
+                                                openRegisterModal();
                                             }}
                                             className="w-full border py-2 rounded flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
                                         >
@@ -194,15 +196,15 @@ const Nav = ({ openNav }: Props) => {
 
                 {/* POPUP LOGIN */}
                 <LoginModal
-                    show={showPopupLarge}
-                    onClose={() => setShowPopupLarge(false)}
+                    show={showLoginModal}
+                    onClose={closeLoginModal}
                     onOpenForgot={() => {
-                        setShowPopupLarge(false);
+                        closeLoginModal();
                         setShowForgotPassword(true);
                     }}
                     onOpenRegister={() => {
-                        setShowPopupLarge(false);
-                        setShowRegister(true);
+                        closeLoginModal();
+                        openRegisterModal();
                     }}
                 />
                 {/* POPUP FORGOT PASSWORD */}
@@ -215,12 +217,12 @@ const Nav = ({ openNav }: Props) => {
 
 
                 {/* POPUP REGISTER */}
-                {showRegister && (
+                {showRegisterModal && (
                     <RegisterModal
-                        onClose={() => setShowRegister(false)}
+                        onClose={closeRegisterModal}
                         onOpenLogin={() => {
-                            setShowRegister(false);   // tắt register
-                            setShowPopupLarge(true);  // bật login popup
+                            closeRegisterModal();
+                            openLoginModal();
                         }}
                     />
                 )}

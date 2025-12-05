@@ -17,7 +17,6 @@ export default function RegisterModal({
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"CANDIDATE" | "EMPLOYER">("CANDIDATE");
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
@@ -32,8 +31,18 @@ export default function RegisterModal({
       return;
     }
 
+    if (!auth) {
+      alert("Authentication system not available");
+      return;
+    }
+
     try {
-      await auth?.register({ username, email, password, role });
+      await auth.register({
+        username,
+        email,
+        password,
+        role: "CANDIDATE"
+      });
       alert("Registration successful! Please check your email to verify your account before logging in.");
       onClose();
       if (onOpenLogin) {
@@ -70,7 +79,6 @@ export default function RegisterModal({
           
 
           <GoogleRegisterButton
-            role={role}
             onSuccess={(data: any) => {
               alert("Google Register successful!");
               console.log("Google Registered user:", data);
@@ -92,35 +100,6 @@ export default function RegisterModal({
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-        </div>
-
-        {/* Role Selection */}
-        <div className="mb-4">
-          <label className="font-medium dark:text-white">I am a:</label>
-          <div className="flex gap-4 mt-2">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="role"
-                value="CANDIDATE"
-                checked={role === "CANDIDATE"}
-                onChange={() => setRole("CANDIDATE")}
-                className="w-4 h-4"
-              />
-              <span className="dark:text-gray-300">Job Seeker</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="role"
-                value="EMPLOYER"
-                checked={role === "EMPLOYER"}
-                onChange={() => setRole("EMPLOYER")}
-                className="w-4 h-4"
-              />
-              <span className="dark:text-gray-300">Employer</span>
-            </label>
-          </div>
         </div>
 
         {/* Email */}
