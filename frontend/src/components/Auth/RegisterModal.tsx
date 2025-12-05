@@ -14,23 +14,33 @@ export default function RegisterModal({
 }) {
   const auth = useContext(AuthContext);
 
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"CANDIDATE" | "EMPLOYER">("CANDIDATE");
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   async function handleRegister() {
+    if (!username || !email || !password) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    if (!agreedToTerms) {
+      alert("Please accept the terms and conditions");
+      return;
+    }
+
     try {
-      const fullName = `${name} ${surname}`.trim();
-
-      await auth?.register(fullName, phoneNumber, email, password);
-      alert("Register successful!");
-
+      await auth?.register({ username, email, password, role });
+      alert("Registration successful! Please check your email to verify your account before logging in.");
       onClose();
+      if (onOpenLogin) {
+        onOpenLogin(); // Open login modal after successful registration
+      }
     } catch (err: any) {
-      alert(err.response?.data?.message || "Register failed");
+      alert(err.response?.data?.message || "Registration failed");
     }
   }
 
@@ -60,6 +70,7 @@ export default function RegisterModal({
           
 
           <GoogleRegisterButton
+            role={role}
             onSuccess={(data: any) => {
               alert("Google Register successful!");
               console.log("Google Registered user:", data);
@@ -72,62 +83,74 @@ export default function RegisterModal({
        
 
         {/* Form */}
-        <div className="grid gap-4 mb-4">
-          <div>
-            <label className="font-medium">Name</label>
-            <input
-              type="text"
-              className="w-full border rounded-lg px-4 py-2 mt-1 outline-none focus:border-blue-500"
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="font-medium">Surname</label>
-            <input
-              type="text"
-              className="w-full border rounded-lg px-4 py-2 mt-1 outline-none focus:border-blue-500"
-              onChange={(e) => setSurname(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Phone */}
         <div className="mb-4">
-          <label className="font-medium">Phone number</label>
+          <label className="font-medium dark:text-white">Username</label>
           <input
             type="text"
-            className="w-full border rounded-lg px-4 py-2 mt-1 outline-none focus:border-blue-500"
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            placeholder="Choose a unique username"
+            className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 mt-1 outline-none focus:border-cyan-500"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
+        </div>
+
+        {/* Role Selection */}
+        <div className="mb-4">
+          <label className="font-medium dark:text-white">I am a:</label>
+          <div className="flex gap-4 mt-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="role"
+                value="CANDIDATE"
+                checked={role === "CANDIDATE"}
+                onChange={() => setRole("CANDIDATE")}
+                className="w-4 h-4"
+              />
+              <span className="dark:text-gray-300">Job Seeker</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="role"
+                value="EMPLOYER"
+                checked={role === "EMPLOYER"}
+                onChange={() => setRole("EMPLOYER")}
+                className="w-4 h-4"
+              />
+              <span className="dark:text-gray-300">Employer</span>
+            </label>
+          </div>
         </div>
 
         {/* Email */}
         <div className="mb-4">
-          <label className="font-medium">Email</label>
+          <label className="font-medium dark:text-white">Email</label>
           <input
             type="email"
-            placeholder="Use a real email for authentication."
-            className="w-full border rounded-lg px-4 py-2 mt-1 outline-none focus:border-blue-500"
+            placeholder="Use a real email for verification"
+            className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 mt-1 outline-none focus:border-cyan-500"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
         {/* Password */}
         <div className="mb-4">
-          <label className="font-medium">Password</label>
+          <label className="font-medium dark:text-white">Password</label>
           <div className="relative mt-1">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="At least 6 characters"
-              className="w-full border rounded-lg px-4 py-2 outline-none focus:border-blue-500 pr-12"
+              className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 outline-none focus:border-cyan-500 pr-12"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
 
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-500 hover:text-gray-700"
+              className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
               {showPassword ? (
                 <EyeSlashIcon className="w-5 h-5" />
@@ -139,13 +162,18 @@ export default function RegisterModal({
         </div>
 
         {/* Terms */}
-        <div className="flex items-start gap-2 mb-6">
-          <input type="checkbox" className="mt-1" />
-          <p className="text-sm">
+        <div className="flex items-start gap-3 mb-6">
+          <input 
+            type="checkbox" 
+            className="mt-1 w-5 h-5 accent-cyan-600 cursor-pointer flex-shrink-0" 
+            checked={agreedToTerms}
+            onChange={(e) => setAgreedToTerms(e.target.checked)}
+          />
+          <p className="text-sm dark:text-gray-300">
             I accept the{" "}
-            <span className="text-blue-600 cursor-pointer">Usage agreement</span>{" "}
+            <span className="text-cyan-600 cursor-pointer hover:underline">Usage agreement</span>{" "}
             and{" "}
-            <span className="text-blue-600 cursor-pointer">
+            <span className="text-cyan-600 cursor-pointer hover:underline">
               Security regulations
             </span>{" "}
             of JobNest.
@@ -155,7 +183,7 @@ export default function RegisterModal({
         {/* Submit */}
         <button
           onClick={handleRegister}
-          className="w-full bg-orange-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-orange-600"
+          className="w-full bg-cyan-700 text-white py-3 rounded-lg text-lg font-semibold hover:bg-cyan-800"
         >
           Register
         </button>

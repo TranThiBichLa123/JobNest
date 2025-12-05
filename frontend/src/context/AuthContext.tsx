@@ -1,81 +1,120 @@
 "use client";
 import React, { createContext, useState, useEffect } from "react";
 import api from "../lib/axios";
+import { User, LoginRequest, RegisterRequest, AuthResponse } from "@/types/user";
 
 // Define context type
 interface AuthContextType {
-  user: any;
-  login: (email: string, password: string) => Promise<void>;
+  user: User | null;
+  login: (credentials: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
-  register: (fullName: string, phone: string, email: string, password: string) => Promise<void>;  // ⭐ ADDED
+  register: (data: RegisterRequest) => Promise<void>;
+  refreshToken: () => Promise<void>;
+  isLoading: boolean;
 }
 
 // Context
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export default function AuthProvider({ children }: any) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // ⭐ ADDED — Tự gán Authorization header nếu có token
+  // Attach token to axios headers
   const attachToken = () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     if (token) {
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     }
   };
 
-  // 🔧 FIXED — login
-  async function login(email: string, password: string) {
-    const res = await api.post("/auth/login", { email, password });
+  // Login function
+  async function login(credentials: LoginRequest) {
+    const res = await api.post<AuthResponse>("/auth/login", credentials);
 
-    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("accessToken", res.data.accessToken);
+    localStorage.setItem("refreshToken", res.data.refreshToken);
 
-    // ⭐ ADDED — gán token vào axios
     attachToken();
-
-    setUser(res.data.user);
+    setUser(res.data.account);
   }
 
+  // Logout function
   async function logout() {
-    localStorage.removeItem("token");
+    const refreshTok = localStorage.getItem("refreshToken");
+    
+    try {
+      await api.post("/auth/logout", { refreshToken: refreshTok });
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
 
-    // ⭐ ADDED — xoá header Authorization
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     delete api.defaults.headers.common["Authorization"];
-
     setUser(null);
   }
 
-  // ⭐ ADDED — register account
-  async function register(fullName: string, phone: string, email: string, password: string) {
-    const res = await api.post("/auth/register", {
-      fullName,
-      phoneNumber: phone,
-      email,
-      password,
-    });
-
-    // ⭐ OPTIONAL — tự động login sau khi đăng ký
-    localStorage.setItem("token", res.data.token);
-    attachToken();
-    setUser(res.data.user);
+  // Register function
+  async function register(data: RegisterRequest) {
+    await api.post("/auth/register", data);
+    // Registration successful - user needs to verify email before logging in
+    // Do NOT store tokens or set user
   }
 
+  // Refresh token function
+  async function refreshToken() {
+    const refreshTok = localStorage.getItem("refreshToken");
+    if (!refreshTok) return;
+
+    try {
+      const res = await api.post<AuthResponse>("/auth/refresh", { refreshToken: refreshTok });
+      
+      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("refreshToken", res.data.refreshToken);
+      
+      attachToken();
+      setUser(res.data.account);
+    } catch (error) {
+      console.error("Refresh token failed:", error);
+      logout();
+    }
+  }
+
+  // Load user on mount
   async function loadUser() {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     if (token) {
-      // ⭐ ADDED — gán lại token vào axios khi reload trang
       attachToken();
 
       try {
-      //   // ❌ Backend chưa có API này → comment lại
-      // const res = await api.get("/auth/me");
-      // setUser(res.data);
-
-      console.log("Token exists but /auth/me is not implemented");
-      } catch (error) {
-        console.log("Not logged in");
+        const res = await api.get<User>("/auth/me");
+        setUser(res.data);
+      } catch (error: any) {
+        // Only log non-401 errors (401 is expected when not logged in)
+        if (error.response?.status !== 401) {
+          console.error("Failed to load user:", error);
+        }
+        
+        // Try to refresh token if we have one
+        const refreshTok = localStorage.getItem("refreshToken");
+        if (refreshTok) {
+          try {
+            await refreshToken();
+          } catch (refreshError) {
+            // Refresh failed, clear tokens
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            delete api.defaults.headers.common["Authorization"];
+          }
+        } else {
+          // No refresh token, clear access token
+          localStorage.removeItem("accessToken");
+          delete api.defaults.headers.common["Authorization"];
+        }
       }
     }
+    setIsLoading(false);
   }
 
   useEffect(() => {
@@ -83,8 +122,7 @@ export default function AuthProvider({ children }: any) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register }}> 
-      {/* ⭐ register ADDED HERE */}
+    <AuthContext.Provider value={{ user, login, logout, register, refreshToken, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

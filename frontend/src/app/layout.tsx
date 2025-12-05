@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning={true} className={`${font.className} antialiased`}>
 
         {/* BỌC TOÀN BỘ APP TRONG Google Provider */}
-        <GoogleOAuthProvider clientId="737701980832-9ustssqhaf802gjd4e31h2jsukml88kv.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
 
           {/* Bên trong là AuthProvider + UI */}
           <AuthProvider>

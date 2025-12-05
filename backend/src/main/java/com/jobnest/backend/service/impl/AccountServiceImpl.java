@@ -1,54 +1,254 @@
 package com.jobnest.backend.service.impl;
 
-import com.jobnest.backend.dto.RegisterRequest;
+import com.jobnest.backend.dto.*;
 import com.jobnest.backend.entities.Account;
+import com.jobnest.backend.entities.EmailVerification;
 import com.jobnest.backend.repository.UserRepository;
+import com.jobnest.backend.repository.EmailVerificationRepository;
 import com.jobnest.backend.service.AccountService;
+import com.jobnest.backend.service.JwtService;
+import com.jobnest.backend.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private final UserRepository userRepository;
+    private final EmailVerificationRepository emailVerificationRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
+    @Transactional
     public Account register(RegisterRequest req) {
-
         if (userRepository.existsByEmail(req.getEmail())) {
             throw new RuntimeException("Email already in use!");
         }
 
+        // Check username uniqueness
+        if (userRepository.existsByUsername(req.getUsername())) {
+            throw new RuntimeException("Username already in use!");
+        }
+
         Account acc = new Account();
-        acc.setFullName(req.getFullName());
+        acc.setUsername(req.getUsername());
         acc.setEmail(req.getEmail());
-        acc.setPhoneNumber(req.getPhoneNumber());
         acc.setPasswordHash(passwordEncoder.encode(req.getPassword()));
-        acc.setRole("candidate");
+        
+        // Set role from request or default to CANDIDATE
+        if (req.getRole() != null) {
+            acc.setRole(Account.Role.valueOf(req.getRole().toUpperCase()));
+        } else {
+            acc.setRole(Account.Role.CANDIDATE);
+        }
+        
+        acc.setStatus(Account.AccountStatus.PENDING);
+
+        Account saved = userRepository.save(acc);
+        
+        // Send email verification
+        sendEmailVerification(saved.getId());
+        
+        return saved;
+    }
+
+    @Override
+    public AuthResponse login(LoginRequest req) {
+        Account account = userRepository.findByEmail(req.getEmail())
+            .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(req.getPassword(), account.getPasswordHash())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        if (account.getStatus() == Account.AccountStatus.BLOCKED) {
+            throw new RuntimeException("Account is blocked. Please contact support.");
+        }
+
+        if (account.getStatus() == Account.AccountStatus.PENDING) {
+            throw new RuntimeException("Account is pending verification. Please check your email to verify your account.");
+        }
+
+        // Update last login
+        account.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(account);
+
+        // Generate real JWT tokens
+        String accessToken = jwtService.generateAccessToken(
+            account.getId(), 
+            account.getEmail(), 
+            account.getRole().name()
+        );
+        String refreshToken = jwtService.generateRefreshToken(
+            account.getId(), 
+            account.getEmail()
+        );
+
+        // Save refresh token to database
+        refreshTokenService.createRefreshToken(account, "Web Browser", "127.0.0.1");
+
+        AccountDTO accountDTO = mapToDTO(account);
+        return new AuthResponse(accessToken, refreshToken, accountDTO);
+    }
+
+    @Override
+    @Transactional
+    public Account registerWithGoogle(String email, String name, String picture, String googleId, String role) {
+        // If user exists, return it
+        java.util.Optional<Account> opt = userRepository.findByEmail(email);
+        if (opt.isPresent()) {
+            return opt.get();
+        }
+
+        // Create new account
+        Account acc = new Account();
+        acc.setEmail(email);
+        acc.setUsername(email.split("@")[0] + "_" + UUID.randomUUID().toString().substring(0, 6));
+        acc.setAvatarUrl(picture);
+        
+        // Set role from parameter or default to CANDIDATE
+        if ("EMPLOYER".equalsIgnoreCase(role)) {
+            acc.setRole(Account.Role.EMPLOYER);
+        } else {
+            acc.setRole(Account.Role.CANDIDATE);
+        }
+        
+        acc.setStatus(Account.AccountStatus.ACTIVE); // Auto-verify Google accounts
+        acc.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString())); // Random password
 
         return userRepository.save(acc);
     }
 
     @Override
-    public Account registerWithGoogle(String email, String name, String picture, String googleId) {
-
-        // Nếu user đã tồn tại → Login
-        java.util.Optional<Account> opt = userRepository.findByEmail(email);
-        if (opt.isPresent())
-            return opt.get();
-
-        // Nếu chưa tồn tại → Register mới
-        Account acc = new Account();
-        acc.setEmail(email);
-        acc.setFullName(name);
-        acc.setAvatarUrl(picture);
-        acc.setGoogleId(googleId);
-        acc.setRole("candidate");
-
-        return userRepository.save(acc);
+    public Account findByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Account not found"));
     }
 
+    @Override
+    public Account findById(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Account not found"));
+    }
+
+    @Override
+    @Transactional
+    public Account updateProfile(Long accountId, Account updates) {
+        Account account = findById(accountId);
+        
+        if (updates.getUsername() != null) {
+            account.setUsername(updates.getUsername());
+        }
+        if (updates.getAvatarUrl() != null) {
+            account.setAvatarUrl(updates.getAvatarUrl());
+        }
+        
+        account.setUpdatedBy(accountId);
+        return userRepository.save(account);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(Long accountId, ChangePasswordRequest req) {
+        Account account = findById(accountId);
+        
+        if (!passwordEncoder.matches(req.getOldPassword(), account.getPasswordHash())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+        
+        account.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
+        account.setUpdatedBy(accountId);
+        userRepository.save(account);
+    }
+
+    @Override
+    @Transactional
+    public void sendPasswordResetEmail(String email) {
+        findByEmail(email); // Validate account exists
+        
+        // TODO: Generate reset token and send email
+        // For now, just log
+        System.out.println("Password reset email would be sent to: " + email);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest req) {
+        // TODO: Verify token and reset password
+        System.out.println("Password reset with token: " + req.getToken());
+    }
+
+    @Override
+    @Transactional
+    public void sendEmailVerification(Long accountId) {
+        Account account = findById(accountId);
+        
+        // Create verification token
+        EmailVerification verification = new EmailVerification();
+        verification.setAccount(account);
+        verification.setToken(UUID.randomUUID().toString());
+        verification.setExpiresAt(LocalDateTime.now().plusHours(24));
+        verification.setCreatedBy(accountId);
+        
+        emailVerificationRepository.save(verification);
+        
+        // TODO: Send email
+        System.out.println("Email verification sent to: " + account.getEmail());
+    }
+
+    @Override
+    @Transactional
+    public void verifyEmail(String token) {
+        EmailVerification verification = emailVerificationRepository
+            .findByTokenAndIsUsedFalse(token)
+            .orElseThrow(() -> new RuntimeException("Invalid or expired verification token"));
+        
+        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Verification token has expired");
+        }
+        
+        Account account = verification.getAccount();
+        account.setStatus(Account.AccountStatus.ACTIVE);
+        userRepository.save(account);
+        
+        verification.setIsUsed(true);
+        emailVerificationRepository.save(verification);
+    }
+
+    @Override
+    @Transactional
+    public void blockAccount(Long accountId) {
+        Account account = findById(accountId);
+        account.setStatus(Account.AccountStatus.BLOCKED);
+        userRepository.save(account);
+    }
+
+    @Override
+    @Transactional
+    public void unblockAccount(Long accountId) {
+        Account account = findById(accountId);
+        account.setStatus(Account.AccountStatus.ACTIVE);
+        userRepository.save(account);
+    }
+
+    private AccountDTO mapToDTO(Account account) {
+        AccountDTO dto = new AccountDTO();
+        dto.setId(account.getId());
+        dto.setUsername(account.getUsername());
+        dto.setEmail(account.getEmail());
+        dto.setRole(account.getRole().name());
+        dto.setAvatarUrl(account.getAvatarUrl());
+        dto.setStatus(account.getStatus().name());
+        dto.setLastLoginAt(account.getLastLoginAt());
+        dto.setCreatedAt(account.getCreatedAt());
+        return dto;
+    }
 }

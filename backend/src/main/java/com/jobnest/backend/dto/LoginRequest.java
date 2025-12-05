@@ -3,9 +3,7 @@ package com.jobnest.backend.dto;
 import lombok.Data;
 
 @Data
-public class RegisterRequest {
-    private String username;
+public class LoginRequest {
     private String email;
     private String password;
-    private String role; // "CANDIDATE" or "EMPLOYER"
 }

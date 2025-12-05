@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import ReactPaginate from "react-paginate";
 import {
   FiChevronsRight,
@@ -200,7 +200,12 @@ export default function JobsPage() {
   // `MOCK_JOBS` is declared at module scope to keep its identity stable between renders.
   const mockJobs = MOCK_JOBS;
 
-  const allJobs = !loading && jobs.length === 0 ? mockJobs : jobs;
+  // useMemo to prevent allJobs from creating new array reference every render
+  const allJobs = useMemo(() => {
+    if (!Array.isArray(jobs)) return [];
+    if (!loading && jobs.length === 0) return mockJobs;
+    return jobs;
+  }, [jobs, loading, mockJobs]);
 
   // Get current date formatted
   const getCurrentDate = () => {
