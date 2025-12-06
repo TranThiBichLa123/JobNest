@@ -22,10 +22,31 @@ export default function LoginModal({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  // Email validation function
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (value && !isValidEmail(value)) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
 
   async function handleLogin() {
     if (!email || !password) {
       setError("Please fill in all fields");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address");
       return;
     }
 
@@ -86,9 +107,16 @@ export default function LoginModal({
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 mt-1 outline-none focus:border-cyan-500"
+              onChange={(e) => handleEmailChange(e.target.value)}
+              className={`w-full border rounded-lg px-4 py-2 mt-1 outline-none ${
+                emailError
+                  ? "border-red-500 focus:border-red-500"
+                  : "dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-cyan-500"
+              }`}
             />
+            {emailError && (
+              <p className="text-red-500 text-sm mt-1">{emailError}</p>
+            )}
           </div>
 
           <div>

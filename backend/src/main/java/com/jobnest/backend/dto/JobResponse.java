@@ -14,6 +14,7 @@ public class JobResponse {
     private Long id;
     private Long employerId;
     private String employerName;
+    private Long companyId;
     private String companyName;
     private String companyLogo;
     private String title;
@@ -34,6 +35,7 @@ public class JobResponse {
     public JobResponse(Job job) {
         this.id = job.getId();
         this.employerId = job.getEmployerId();
+        this.companyId = job.getCompanyId();
         this.title = job.getTitle();
         this.description = job.getDescription();
         this.category = job.getCategory();

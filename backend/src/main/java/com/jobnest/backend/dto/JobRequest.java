@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class JobRequest {
+    private Long companyId;
     private String title;
     private String description;
     private String category;

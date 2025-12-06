@@ -8,6 +8,7 @@ import com.jobnest.backend.service.JwtService;
 import com.jobnest.backend.service.RefreshTokenService;
 import com.jobnest.backend.security.user.CustomUserDetails;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "1. Authentication", description = "Authentication and user management APIs")
 public class AuthController {
 
     private final AccountService accountService;

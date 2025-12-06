@@ -19,10 +19,31 @@ export default function RegisterModal({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  // Email validation function
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (value && !isValidEmail(value)) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
 
   async function handleRegister() {
     if (!username || !email || !password) {
       alert("Please fill in all fields");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      alert("Please enter a valid email address");
       return;
     }
 
@@ -111,10 +132,17 @@ export default function RegisterModal({
           <input
             type="email"
             placeholder="Use a real email for verification"
-            className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 mt-1 outline-none focus:border-cyan-500"
+            className={`w-full border rounded-lg px-4 py-2 mt-1 outline-none ${
+              emailError
+                ? "border-red-500 focus:border-red-500"
+                : "dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-cyan-500"
+            }`}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => handleEmailChange(e.target.value)}
           />
+          {emailError && (
+            <p className="text-red-500 text-sm mt-1">{emailError}</p>
+          )}
         </div>
 
         {/* Password */}

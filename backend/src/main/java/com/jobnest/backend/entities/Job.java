@@ -15,10 +15,13 @@ public class Job {
     @Column(name = "employer_id", nullable = false)
     private Long employerId;
 
+    @Column(name = "company_id")
+    private Long companyId;
+
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false, length = 100)
@@ -53,6 +56,10 @@ public class Job {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employer_id", insertable = false, updatable = false)
     private Account employer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", insertable = false, updatable = false)
+    private Company company;
 
     public enum JobType {
         fulltime, parttime, intern, remote

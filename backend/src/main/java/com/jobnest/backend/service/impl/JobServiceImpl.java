@@ -85,8 +85,15 @@ public class JobServiceImpl implements JobService {
         userRepository.findById(employerId)
                 .orElseThrow(() -> new RuntimeException("Employer not found"));
 
+        // Verify company exists and belongs to employer (if companyId is provided)
+        if (request.getCompanyId() != null) {
+            companyRepository.findByEmployerIdAndId(employerId, request.getCompanyId())
+                    .orElseThrow(() -> new RuntimeException("Company not found or does not belong to this employer"));
+        }
+
         Job job = new Job();
         job.setEmployerId(employerId);
+        job.setCompanyId(request.getCompanyId());
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
         job.setCategory(request.getCategory());
@@ -111,6 +118,13 @@ public class JobServiceImpl implements JobService {
             throw new RuntimeException("Not authorized to update this job");
         }
 
+        // Verify company exists and belongs to employer (if companyId is provided)
+        if (request.getCompanyId() != null) {
+            companyRepository.findByEmployerIdAndId(employerId, request.getCompanyId())
+                    .orElseThrow(() -> new RuntimeException("Company not found or does not belong to this employer"));
+        }
+
+        job.setCompanyId(request.getCompanyId());
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
         job.setCategory(request.getCategory());
@@ -247,9 +261,11 @@ public class JobServiceImpl implements JobService {
     @Override
     @Transactional
     public void saveJob(Long userId, Long jobId) {
-        if (!jobRepository.existsById(jobId)) {
-            throw new RuntimeException("Job not found");
-        }
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+        
+        Account user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         SavedJob.SavedJobId id = new SavedJob.SavedJobId();
         id.setUserId(userId);
@@ -258,6 +274,8 @@ public class JobServiceImpl implements JobService {
         if (!savedJobRepository.existsById(id)) {
             SavedJob savedJob = new SavedJob();
             savedJob.setId(id);
+            savedJob.setUser(user);  // Set the user entity
+            savedJob.setJob(job);    // Set the job entity
             savedJobRepository.save(savedJob);
         }
     }
@@ -293,12 +311,12 @@ public class JobServiceImpl implements JobService {
             response.setEmployerName(account.getUsername());
         });
         
-        // Get company info if exists
-        List<Company> companies = companyRepository.findByEmployerId(job.getEmployerId());
-        if (!companies.isEmpty()) {
-            Company company = companies.get(0);
-            response.setCompanyName(company.getName());
-            response.setCompanyLogo(company.getLogoUrl());
+        // Get company info if companyId exists
+        if (job.getCompanyId() != null) {
+            companyRepository.findById(job.getCompanyId()).ifPresent(company -> {
+                response.setCompanyName(company.getName());
+                response.setCompanyLogo(company.getLogoUrl());
+            });
         }
         
         return response;

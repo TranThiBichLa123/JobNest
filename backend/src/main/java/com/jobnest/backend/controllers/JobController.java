@@ -3,6 +3,7 @@ package com.jobnest.backend.controllers;
 import com.jobnest.backend.dto.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.JobService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -83,6 +84,7 @@ public class JobController {
      */
     @PostMapping("/{id}/save")
     @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<String> saveJob(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -96,6 +98,7 @@ public class JobController {
      */
     @DeleteMapping("/{id}/save")
     @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<String> unsaveJob(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -109,6 +112,7 @@ public class JobController {
      */
     @GetMapping("/saved")
     @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<List<JobResponse>> getSavedJobs(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
