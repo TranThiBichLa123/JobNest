@@ -4,6 +4,7 @@ import com.jobnest.backend.dto.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.JobService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
+@Tag(name = "2. Jobs", description = "Job listing and management APIs for candidates")
 public class JobController {
 
     private final JobService jobService;
