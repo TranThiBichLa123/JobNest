@@ -1,15 +1,11 @@
 package com.jobnest.backend.service.impl;
 
-import com.jobnest.backend.dto.ExtendJobRequest;
-import com.jobnest.backend.dto.JobRequest;
-import com.jobnest.backend.dto.JobResponse;
+import com.jobnest.backend.dto.response.JobCategoryResponse;
+import com.jobnest.backend.dto.request.ExtendJobRequest;
+import com.jobnest.backend.dto.request.JobRequest;
+import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.entities.*;
-import com.jobnest.backend.repository.UserRepository;
-import com.jobnest.backend.repository.AuditLogRepository;
-import com.jobnest.backend.repository.CompanyRepository;
-import com.jobnest.backend.repository.JobRepository;
-import com.jobnest.backend.repository.JobViewRepository;
-import com.jobnest.backend.repository.SavedJobRepository;
+import com.jobnest.backend.repository.*;
 import com.jobnest.backend.service.JobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +27,7 @@ public class JobServiceImpl implements JobService {
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
+    private final JobCategoryRepository jobCategoryRepository;
 
     // ==================== CANDIDATE OPERATIONS ====================
 
@@ -75,6 +72,20 @@ public class JobServiceImpl implements JobService {
         }
         return response;
     }
+    @Override
+    public List<JobCategoryResponse> getCategoryStats() {
+        List<Object[]> results = jobRepository.countActiveJobsByCategory();
+        return results.stream()
+                .map(row -> new JobCategoryResponse(
+                        (Long) row[0],    // id
+                        (String) row[1],  // name
+                        (String) row[2],  // slug
+                        (String) row[3],  // iconUrl
+                        null,             // description (not needed for stats)
+                        (Long) row[4]     // openPositions
+                ))
+                .collect(Collectors.toList());
+    }
 
     // ==================== EMPLOYER OPERATIONS ====================
 
@@ -91,16 +102,25 @@ public class JobServiceImpl implements JobService {
                     .orElseThrow(() -> new RuntimeException("Company not found or does not belong to this employer"));
         }
 
+        // Verify category exists
+        jobCategoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
         Job job = new Job();
         job.setEmployerId(employerId);
         job.setCompanyId(request.getCompanyId());
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
-        job.setCategory(request.getCategory());
+        job.setCategoryId(request.getCategoryId());
         job.setLocation(request.getLocation());
         job.setType(request.getType());
         job.setMinSalary(request.getMinSalary());
         job.setMaxSalary(request.getMaxSalary());
+        job.setExperience(request.getExperience());
+        job.setExperienceLevel(request.getExperienceLevel());
+        job.setEducation(request.getEducation());
+        job.setSkills(request.getSkills());
+        job.setIsUrgent(request.getIsUrgent());
         job.setStatus(Job.JobStatus.active);
         job.setExpiresAt(LocalDateTime.now().plusDays(30)); // Default 30 days
 
@@ -124,14 +144,25 @@ public class JobServiceImpl implements JobService {
                     .orElseThrow(() -> new RuntimeException("Company not found or does not belong to this employer"));
         }
 
+        // Verify category exists
+        if (request.getCategoryId() != null) {
+            jobCategoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+        }
+
         job.setCompanyId(request.getCompanyId());
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
-        job.setCategory(request.getCategory());
+        job.setCategoryId(request.getCategoryId());
         job.setLocation(request.getLocation());
         job.setType(request.getType());
         job.setMinSalary(request.getMinSalary());
         job.setMaxSalary(request.getMaxSalary());
+        job.setExperience(request.getExperience());
+        job.setExperienceLevel(request.getExperienceLevel());
+        job.setEducation(request.getEducation());
+        job.setSkills(request.getSkills());
+        job.setIsUrgent(request.getIsUrgent());
 
         Job updated = jobRepository.save(job);
         return convertToResponse(updated);

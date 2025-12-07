@@ -1,6 +1,7 @@
 package com.jobnest.backend.service;
 
-import com.jobnest.backend.dto.*;
+import com.jobnest.backend.dto.request.*;
+import com.jobnest.backend.dto.response.*;
 import com.jobnest.backend.entities.Account;
 
 public interface AccountService {

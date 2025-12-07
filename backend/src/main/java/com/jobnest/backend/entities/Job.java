@@ -24,8 +24,8 @@ public class Job {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false, length = 100)
-    private String category;
+    @Column(name = "category_id", nullable = false)
+    private Long categoryId;
 
     @Column(nullable = false, length = 150)
     private String location;
@@ -39,6 +39,21 @@ public class Job {
 
     @Column(name = "max_salary")
     private Integer maxSalary;
+
+    @Column(length = 50)
+    private String experience;
+
+    @Column(name = "experience_level", length = 50)
+    private String experienceLevel;
+
+    @Column(length = 100)
+    private String education;
+
+    @Column(columnDefinition = "TEXT")
+    private String skills;
+
+    @Column(name = "is_urgent")
+    private Boolean isUrgent = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -60,6 +75,10 @@ public class Job {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", insertable = false, updatable = false)
     private Company company;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private JobCategory category;
 
     public enum JobType {
         fulltime, parttime, intern, remote

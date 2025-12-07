@@ -18,9 +18,15 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     
     @Query("SELECT j FROM Job j WHERE j.status = 'active' AND " +
            "(LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(j.category) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+           "LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Job> searchActiveJobs(@Param("keyword") String keyword, Pageable pageable);
+    
+    // Count active jobs by category with JOIN
+    @Query("SELECT c.id, c.name, c.slug, c.iconUrl, COUNT(j.id) " +
+           "FROM JobCategory c LEFT JOIN Job j ON c.id = j.categoryId AND j.status = 'active' " +
+           "GROUP BY c.id, c.name, c.slug, c.iconUrl " +
+           "ORDER BY c.name ASC")
+    List<Object[]> countActiveJobsByCategory();
     
     // Employer queries - their own jobs
     Page<Job> findByEmployerId(Long employerId, Pageable pageable);
@@ -28,8 +34,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByEmployerId(Long employerId);
     
     @Query("SELECT j FROM Job j WHERE j.employerId = :employerId AND " +
-           "(LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(j.category) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+           "LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Job> searchEmployerJobs(@Param("employerId") Long employerId, 
                                    @Param("keyword") String keyword, 
                                    Pageable pageable);
@@ -39,7 +44,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     
     @Query("SELECT j FROM Job j WHERE " +
            "LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(j.category) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "CAST(j.employerId AS string) LIKE CONCAT('%', :keyword, '%')")
     Page<Job> searchAllJobs(@Param("keyword") String keyword, Pageable pageable);
     

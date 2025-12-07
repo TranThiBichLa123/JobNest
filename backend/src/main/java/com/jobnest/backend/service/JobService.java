@@ -1,8 +1,9 @@
 package com.jobnest.backend.service;
 
-import com.jobnest.backend.dto.ExtendJobRequest;
-import com.jobnest.backend.dto.JobRequest;
-import com.jobnest.backend.dto.JobResponse;
+import com.jobnest.backend.dto.response.JobCategoryResponse;
+import com.jobnest.backend.dto.request.ExtendJobRequest;
+import com.jobnest.backend.dto.request.JobRequest;
+import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.entities.Job;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,9 @@ public interface JobService {
     Page<JobResponse> getAllActiveJobs(Pageable pageable);
     Page<JobResponse> searchActiveJobs(String keyword, Pageable pageable);
     JobResponse getJobById(Long id, Long viewerId, String viewerIp);
+    
+    // Category stats
+    List<JobCategoryResponse> getCategoryStats();
     
     // Employer operations
     JobResponse createJob(Long employerId, JobRequest request);
