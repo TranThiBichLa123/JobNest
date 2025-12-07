@@ -11,7 +11,14 @@ function useFetch(url: string) {
       try {
         const response = await fetch(url);
         const json = await response.json();
-        setData(json);
+        
+        // Handle paginated responses (Spring Data Page)
+        if (json && typeof json === 'object' && 'content' in json) {
+          setData(json.content);
+        } else {
+          setData(json);
+        }
+        
         setLoading(false);
       } catch (error) {
         setError(error as string);

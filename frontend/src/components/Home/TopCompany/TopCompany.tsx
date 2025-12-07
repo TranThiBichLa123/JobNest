@@ -1,10 +1,11 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import SelectionHeading from '../../Helper/SelectionHeading'
 import dynamic from 'next/dynamic';
 const Carousel = dynamic(() => import('react-multi-carousel'), { ssr: false });
 import 'react-multi-carousel/lib/styles.css';
 import TopCompanyCard from './TopCompanyCard';
+import { companyApi } from '@/lib/api';
 
 const responsive = {
     desktop: {
@@ -24,40 +25,60 @@ const responsive = {
     }
 };
 
-const CompanyData = [
+// Fallback mock data when API returns empty
+const MOCK_COMPANY_DATA = [
     {
         id: 1,
-        image: "/images/c1.png",
+        logoUrl: "/images/c1.png",
         name: "Udemy",
-        location: "London, UK",
-        position: "20"
+        address: "London, UK",
+        openPositions: 20
     },
     {
         id: 2,
-        image: "/images/c2.png",
+        logoUrl: "/images/c2.png",
         name: "Stripe",
-        location: "Kolkata, India",
-        position: "30"
+        address: "Kolkata, India",
+        openPositions: 30
     },
     {
         id: 3,
-        image: "/images/c3.png",
+        logoUrl: "/images/c3.png",
         name: "Dropbox",
-        location: "Lahore, Pakistan",
-        position: "33"
+        address: "Lahore, Pakistan",
+        openPositions: 33
     },
     {
         id: 4,
-        image: "/images/c4.png",
+        logoUrl: "/images/c4.png",
         name: "Figma",
-        location: "Dhaka, Bangladesh",
-        position: "40"
+        address: "Dhaka, Bangladesh",
+        openPositions: 40
     }
-]
-
-
+];
 
 const TopCompany = () => {
+    const [companies, setCompanies] = useState<any[]>(MOCK_COMPANY_DATA);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTopCompanies = async () => {
+            try {
+                const data = await companyApi.getTopCompanies();
+                if (data && data.length > 0) {
+                    setCompanies(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch top companies:', error);
+                // Keep using mock data on error
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTopCompanies();
+    }, []);
+
     return <div className='pt-16 pb-16'>
         <SelectionHeading
             heading='Top Company Registered'
@@ -73,7 +94,7 @@ const TopCompany = () => {
                 autoPlaySpeed={4000}
 
             >
-             {CompanyData.map((data)=>{
+             {companies.map((data)=>{
                 return <TopCompanyCard key={data.id} data={data}/>
              })}
             </Carousel>

@@ -1,104 +1,38 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import SelectionHeading from '../components/Helper/SelectionHeading'
 import JobCard from '../components/Home/Job/JobCard'
-
-
-
-const jobs = [
-    {
-        id: 1,
-        image: '/images/j1.png',
-        title: 'Software Engineer',
-        location: 'London, UK',
-        jobType: 'Full Time',
-        urgency: 'Urgent'
-    },
-    {
-        id: 2,
-        image: '/images/j2.png',
-        title: 'Recruiting Coordinator',
-        location: 'Manchester, UK',
-        jobType: 'Part Time',
-        urgency: 'Urgent',
-    },
-    {
-        id: 3,
-        image: '/images/j3.png',
-        title: 'Product Manager, Studio',
-        location: 'Birmingham, UK',
-        jobType: 'Contract',
-        urgency: 'Urgent',
-    },
-    {
-        id: 4,
-        image: '/images/j4.png',
-        title: 'Senior Product Designer',
-        location: 'Bristol, UK',
-        jobType: 'Full Time',
-        urgency: 'Urgent',
-    },
-    {
-        id: 5,
-        image: '/images/j5.png',
-        title: 'Product Manager, Risk',
-        location: 'Edinburgh, UK',
-        jobType: 'Contract',
-        urgency: 'Private',
-    },
-    {
-        id: 6,
-        image: '/images/j6.png',
-        title: 'Technical Architect',
-        location: 'Leeds, UK',
-        jobType: 'Full Time',
-        urgency: 'Private',
-    },
-    {
-        id: 7,
-        image: '/images/j7.png',
-        title: 'Web Developer',
-        location: 'Brighton, UK',
-        jobType: 'Part Time',
-        urgency: 'Urgent',
-    },
-    {
-        id: 8,
-        image: '/images/j8.png',
-        title: 'Senior Product Designer',
-        location: 'Glasgow, UK',
-        jobType: 'Contract',
-        urgency: 'Private',
-    },
-    {
-        id: 9,
-        image: '/images/j9.png',
-        title: 'Senior BI Analyst',
-        location: 'Sheffield, UK',
-        jobType: 'Full Time',
-        urgency: 'Private',
-    },
-]
+import useFetch from '@/hooks/useFetch'
+import { server } from '@/lib/config'
 
 const Job = () => {
+    const { data: jobs = [], loading } = useFetch(`${server}/api/jobs?size=9`);
+
     return (
         <div className='pt-16 pb-16 '>
             <SelectionHeading
                 heading='Featured Jobs'
                 subHeading='Know your worth and find the job that qualify your life'
             />
-            <div className='w-[95%] sm:w-[80%] mt-16 mx-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10
-            items-center'>
-                {jobs.map((job, index) => {
-                    return <div key={job.id}
-                    data-aos="faded-up"
-                    data-aos-anchor-placement="top-center"
-                    data-aos-delay={index*100}
-                    >
+            {loading ? (
+                <div className='text-center py-20'>
+                    <div className='inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
+                    <p className='mt-4 text-gray-600 dark:text-gray-400'>Loading featured jobs...</p>
+                </div>
+            ) : (
+                <div className='w-[95%] sm:w-[80%] mt-16 mx-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10
+                items-center'>
+                    {jobs.slice(0, 9).map((job: any, index: number) => {
+                        return <div key={job.id}
+                        data-aos="fade-up"
+                        data-aos-anchor-placement="top-center"
+                        data-aos-delay={index*100}
+                        >
                         <JobCard job={job} />
                     </div>
                 })}
             </div>
+            )}
             <div className='mt-10 text-center'>
                 <div>
                     <a href="/jobs" className='px-10 py-4 bg-blue-700 text-white cursor-pointer rounded-lg hover:to-blue-800
