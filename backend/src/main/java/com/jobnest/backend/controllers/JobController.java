@@ -1,6 +1,7 @@
 package com.jobnest.backend.controllers;
 
-import com.jobnest.backend.dto.JobResponse;
+import com.jobnest.backend.dto.response.JobCategoryResponse;
+import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.JobService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -120,5 +121,14 @@ public class JobController {
     ) {
         List<JobResponse> savedJobs = jobService.getSavedJobs(userDetails.getAccount().getId());
         return ResponseEntity.ok(savedJobs);
+    }
+
+    /**
+     * GET /api/jobs/categories/stats - Get job count by category
+     */
+    @GetMapping("/categories/stats")
+    public ResponseEntity<List<JobCategoryResponse>> getCategoryStats() {
+        List<JobCategoryResponse> stats = jobService.getCategoryStats();
+        return ResponseEntity.ok(stats);
     }
 }

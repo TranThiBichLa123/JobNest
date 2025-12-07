@@ -47,6 +47,8 @@ public class WebSecurityConfig {
                                 "/api/auth/google/**",
                                 "/api/jobs",
                                 "/api/jobs/**",
+                                "/api/companies/**",
+                                "/uploads/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**")
                         .permitAll()

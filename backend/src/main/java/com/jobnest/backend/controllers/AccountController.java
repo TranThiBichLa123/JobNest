@@ -1,6 +1,6 @@
 package com.jobnest.backend.controllers;
 
-import com.jobnest.backend.dto.ChangePasswordRequest;
+import com.jobnest.backend.dto.request.ChangePasswordRequest;
 import com.jobnest.backend.entities.Account;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.AccountService;

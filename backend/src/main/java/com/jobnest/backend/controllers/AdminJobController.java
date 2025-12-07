@@ -1,6 +1,6 @@
 package com.jobnest.backend.controllers;
 
-import com.jobnest.backend.dto.JobResponse;
+import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.JobService;
 import lombok.RequiredArgsConstructor;

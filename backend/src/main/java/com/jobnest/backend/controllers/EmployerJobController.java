@@ -1,8 +1,8 @@
 package com.jobnest.backend.controllers;
 
-import com.jobnest.backend.dto.ExtendJobRequest;
-import com.jobnest.backend.dto.JobRequest;
-import com.jobnest.backend.dto.JobResponse;
+import com.jobnest.backend.dto.request.ExtendJobRequest;
+import com.jobnest.backend.dto.request.JobRequest;
+import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.JobService;
 import lombok.RequiredArgsConstructor;
