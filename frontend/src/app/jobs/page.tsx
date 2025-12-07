@@ -24,175 +24,276 @@ const MOCK_JOBS = [
   {
     id: "mock-1",
     title: "Frontend Developer",
-    company_name: "Udemy",
-    company_location: "Hanoi, VN",
-    logo_url: "/images/j1.png",
-    type_of_employment: "Full Time",
+    companyName: "Udemy",
+    location: "Hanoi, VN",
+    companyLogo: "/images/j1.png",
+    type: "fulltime",
     experience: "1 - 2 Years",
-    experience_level: "Entry Level",
+    experienceLevel: "Entry Level",
+    education: "Bachelor's Degree",
     description: "Build and maintain user interfaces using React and Next.js.",
-    skills: ["React", "TypeScript", "Next.js"],
-    salary_range: "$40k -55k",
-    category: "Development",
+    skills: "React,TypeScript,Next.js",
+    salaryRange: "$40k -55k",
+    minSalary: 40000,
+    maxSalary: 55000,
+    categoryName: "Development",
+    isUrgent: false,
   },
   {
     id: "mock-2",
     title: "Backend Developer",
-    company_name: "Beta Solutions",
-    company_location: "Ho Chi Minh City, VN",
-    logo_url: "/images/j2.png",
-    type_of_employment: "Part Time",
+    companyName: "Beta Solutions",
+    location: "Ho Chi Minh City, VN",
+    companyLogo: "/images/j2.png",
+    type: "parttime",
     experience: "2 - 6 Years",
-    experience_level: "Mid Level",
+    experienceLevel: "Mid Level",
+    education: "Bachelor's Degree",
     description: "Design REST APIs with Spring Boot and Java.",
-    skills: ["Java", "Spring", "SQL"],
-    salary_range: "$55k - 85k",
-    category: "Development",
+    skills: "Java,Spring,SQL",
+    salaryRange: "$55k - 85k",
+    minSalary: 55000,
+    maxSalary: 85000,
+    categoryName: "Development",
+    isUrgent: false,
   },
   {
     id: "mock-3",
     title: "UI/UX Designer",
-    company_name: "Creative Studio",
-    company_location: "Da Nang, VN",
-    logo_url: "/images/j3.png",
-    type_of_employment: "Contract",
+    companyName: "Creative Studio",
+    location: "Da Nang, VN",
+    companyLogo: "/images/j3.png",
+    type: "fulltime",
     experience: "2 - 6 Years",
-    experience_level: "Mid Level",
+    experienceLevel: "Mid Level",
+    education: "Associate Studies",
     description: "Design interfaces and experiences for web applications.",
-    skills: ["Figma", "UX", "Prototyping"],
-    salary_range: "$55k - 85k",
-    category: "Design",
+    skills: "Figma,UX,Prototyping",
+    salaryRange: "$55k - 85k",
+    minSalary: 55000,
+    maxSalary: 85000,
+    categoryName: "Design",
+    isUrgent: true,
   },
   {
     id: "mock-4",
     title: "DevOps Engineer",
-    company_name: "CloudOps",
-    company_location: "Remote",
-    logo_url: "/images/j4.png",
-    type_of_employment: "Remote",
+    companyName: "CloudOps",
+    location: "Remote",
+    companyLogo: "/images/j4.png",
+    type: "remote",
     experience: "Over 6 Years",
-    experience_level: "Senior Level",
+    experienceLevel: "Senior Level",
+    education: "Masters Degree",
     description: "Maintain CI/CD pipelines and cloud infrastructure.",
-    skills: ["AWS", "Docker", "Kubernetes"],
-    salary_range: "$115k - 145k",
-    category: "Development",
+    skills: "AWS,Docker,Kubernetes",
+    salaryRange: "$115k - 145k",
+    minSalary: 115000,
+    maxSalary: 145000,
+    categoryName: "Development",
+    isUrgent: false,
   },
   {
     id: "mock-5",
     title: "QA Engineer",
-    company_name: "QualityWorks",
-    company_location: "Hanoi, VN",
-    logo_url: "/images/j5.png",
-    type_of_employment: "Full Time",
+    companyName: "QualityWorks",
+    location: "Hanoi, VN",
+    companyLogo: "/images/j5.png",
+    type: "fulltime",
     experience: "1 - 2 Years",
-    experience_level: "Entry Level",
+    experienceLevel: "Entry Level",
+    education: "Vocational Course",
     description: "Ensure product quality through testing and automation.",
-    skills: ["Selenium", "Testing"],
-    salary_range: "$40k -55k",
-    category: "Development",
+    skills: "Selenium,Testing",
+    salaryRange: "$40k -55k",
+    minSalary: 40000,
+    maxSalary: 55000,
+    categoryName: "Development",
+    isUrgent: false,
   },
   {
     id: "mock-6",
     title: "Product Manager",
-    company_name: "Prodify",
-    company_location: "Hanoi, VN",
-    logo_url: "/images/j6.png",
-    type_of_employment: "Full Time",
+    companyName: "Prodify",
+    location: "Hanoi, VN",
+    companyLogo: "/images/j6.png",
+    type: "fulltime",
     experience: "2 - 6 Years",
-    experience_level: "Mid Level",
+    experienceLevel: "Mid Level",
+    education: "Masters Degree",
     description: "Lead product direction and roadmap.",
-    skills: ["Roadmapping", "Stakeholder Management"],
-    salary_range: "$85k - 115k",
-    category: "Project Management",
+    skills: "Roadmapping,Stakeholder Management",
+    salaryRange: "$85k - 115k",
+    minSalary: 85000,
+    maxSalary: 115000,
+    categoryName: "Project Management",
+    isUrgent: false,
   },
   {
     id: "mock-7",
     title: "Data Scientist",
-    company_name: "Insight Labs",
-    company_location: "Ho Chi Minh City, VN",
-    logo_url: "/images/j7.png",
-    type_of_employment: "Full Time",
+    companyName: "Insight Labs",
+    location: "Ho Chi Minh City, VN",
+    companyLogo: "/images/j7.png",
+    type: "fulltime",
     experience: "2 - 6 Years",
-    experience_level: "Mid Level",
+    experienceLevel: "Mid Level",
+    education: "PHD",
     description: "Analyze data and build predictive models.",
-    skills: ["Python", "ML"],
-    salary_range: "$85k - 115k",
-    category: "Development",
+    skills: "Python,ML",
+    salaryRange: "$85k - 115k",
+    minSalary: 85000,
+    maxSalary: 115000,
+    categoryName: "Development",
+    isUrgent: false,
   },
   {
     id: "mock-8",
     title: "Mobile Developer",
-    company_name: "Appify",
-    company_location: "Da Nang, VN",
-    logo_url: "/images/j8.png",
-    type_of_employment: "Freelance",
+    companyName: "Appify",
+    location: "Da Nang, VN",
+    companyLogo: "/images/j8.png",
+    type: "freelance",
     experience: "1 - 2 Years",
-    experience_level: "Entry Level",
+    experienceLevel: "Entry Level",
+    education: "Graduated High School",
     description: "Develop mobile apps using React Native.",
-    skills: ["React Native", "iOS", "Android"],
-    salary_range: "$55k - 85k",
-    category: "Development",
+    skills: "React Native,iOS,Android",
+    salaryRange: "$55k - 85k",
+    minSalary: 55000,
+    maxSalary: 85000,
+    categoryName: "Development",
+    isUrgent: false,
   },
   {
     id: "mock-9",
     title: "System Administrator",
-    company_name: "InfraHub",
-    company_location: "Remote",
-    logo_url: "/images/j9.png",
-    type_of_employment: "Remote",
+    companyName: "InfraHub",
+    location: "Remote",
+    companyLogo: "/images/j9.png",
+    type: "remote",
     experience: "Over 6 Years",
-    experience_level: "Senior Level",
+    experienceLevel: "Senior Level",
+    education: "Associate Studies",
     description: "Manage servers and networks.",
-    skills: ["Linux", "Networking"],
-    salary_range: "$115k - 145k",
-    category: "Development",
+    skills: "Linux,Networking",
+    salaryRange: "$115k - 145k",
+    minSalary: 115000,
+    maxSalary: 145000,
+    categoryName: "Development",
+    isUrgent: true,
   },
   {
     id: "mock-10",
     title: "Technical Writer",
-    company_name: "DocsCo",
-    company_location: "Hanoi, VN",
-    logo_url: "/images/l1.png",
-    type_of_employment: "Part Time",
+    companyName: "DocsCo",
+    location: "Hanoi, VN",
+    companyLogo: "/images/l1.png",
+    type: "parttime",
     experience: "Under 1 Year",
-    experience_level: "Entry Level",
+    experienceLevel: "Entry Level",
+    education: "Bachelor's Degree",
     description: "Write technical documentation and guides.",
-    skills: ["Writing", "Markdown"],
-    salary_range: "$40k -55k",
-    category: "Marketing",
+    skills: "Writing,Markdown",
+    salaryRange: "$40k -55k",
+    minSalary: 40000,
+    maxSalary: 55000,
+    categoryName: "Marketing",
+    isUrgent: false,
   },
   {
     id: "mock-11",
     title: "Sales Engineer",
-    company_name: "SalesTech",
-    company_location: "Ho Chi Minh City, VN",
-    logo_url: "/images/l2.png",
-    type_of_employment: "Full Time",
+    companyName: "SalesTech",
+    location: "Ho Chi Minh City, VN",
+    companyLogo: "/images/l2.png",
+    type: "fulltime",
     experience: "2 - 6 Years",
-    experience_level: "Mid Level",
+    experienceLevel: "Mid Level",
+    education: "Bachelor's Degree",
     description: "Support sales with technical expertise.",
-    skills: ["Pre-sales", "Demos"],
-    salary_range: "$85k - 115k",
-    category: "Marketing",
+    skills: "Pre-sales,Demos",
+    salaryRange: "$85k - 115k",
+    minSalary: 85000,
+    maxSalary: 115000,
+    categoryName: "Marketing",
+    isUrgent: false,
   },
   {
     id: "mock-12",
     title: "Customer Success",
-    company_name: "HappyClients",
-    company_location: "Da Nang, VN",
-    logo_url: "/images/l3.png",
-    type_of_employment: "Full Time",
+    companyName: "HappyClients",
+    location: "Da Nang, VN",
+    companyLogo: "/images/l3.png",
+    type: "fulltime",
     experience: "1 - 2 Years",
-    experience_level: "Entry Level",
+    experienceLevel: "Entry Level",
+    education: "Vocational Course",
     description: "Ensure customers achieve value from our product.",
-    skills: ["Support", "Onboarding"],
-    salary_range: "$55k - 85k",
-    category: "Customer Service",
+    skills: "Support,Onboarding",
+    salaryRange: "$55k - 85k",
+    minSalary: 55000,
+    maxSalary: 85000,
+    categoryName: "Customer Service",
+    isUrgent: false,
   },
 ];
 
+// Helper functions to convert backend data to filter format
+const formatJobTypeForFilter = (type?: string) => {
+  if (!type) return null;
+  const typeMap: { [key: string]: string } = {
+    'fulltime': 'Full Time',
+    'parttime': 'Part Time',
+    'remote': 'Remote',
+    'contract': 'Contract',
+    'freelance': 'Freelance',
+    'internship': 'Internship',
+  };
+  return typeMap[type.toLowerCase()] || type;
+};
+
+const formatSalaryRangeForFilter = (minSalary?: number, maxSalary?: number) => {
+  if (!minSalary || !maxSalary) return null;
+  
+  // Match the filter ranges
+  if (minSalary >= 40000 && maxSalary <= 55000) return "$40k -55k";
+  if (minSalary >= 55000 && maxSalary <= 85000) return "$55k - 85k";
+  if (minSalary >= 85000 && maxSalary <= 115000) return "$85k - 115k";
+  if (minSalary >= 115000 && maxSalary <= 145000) return "$115k - 145k";
+  if (minSalary >= 145000 && maxSalary <= 175000) return "$145k - 175k";
+  
+  // Fallback: check which range it falls into
+  const avgSalary = (minSalary + maxSalary) / 2;
+  if (avgSalary < 55000) return "$40k -55k";
+  if (avgSalary < 85000) return "$55k - 85k";
+  if (avgSalary < 115000) return "$85k - 115k";
+  if (avgSalary < 145000) return "$115k - 145k";
+  return "$145k - 175k";
+};
+
+// Get job value for filtering
+const getJobValueForFilter = (job: any, filterName: string) => {
+  switch(filterName) {
+    case 'category':
+      return job.categoryName || job.category;
+    case 'type_of_employment':
+      return formatJobTypeForFilter(job.type);
+    case 'experience_level':
+      return job.experienceLevel || job.experience_level;
+    case 'salary_range':
+      return formatSalaryRangeForFilter(job.minSalary, job.maxSalary);
+    case 'experience':
+      return job.experience;
+    case 'education':
+      return job.education;
+    default:
+      return job[filterName];
+  }
+};
+
 export default function JobsPage() {
-  const { data: jobs = [], loading } = useFetch(`${server}/api/jobs`);
+  const { data: jobs = [], loading } = useFetch(`${server}/api/jobs?size=100`);
   const searchParams = useSearchParams();
 
   // Fallback mock jobs for development / when API returns empty
@@ -230,6 +331,22 @@ export default function JobsPage() {
   const handleCloseFiltermenu = (e: any) => {
     if (e.target.classList && e.target.classList.contains("filter-modal")) setIsFilterMenuOpen(false);
   };
+
+  // Sort functionality
+  const [sortBy, setSortBy] = useState("recent");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (showSortDropdown && !target.closest('.sort-dropdown-container')) {
+        setShowSortDropdown(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showSortDropdown]);
 
   // read query params (category, company, title, location) and prefill search/filters
   useEffect(() => {
@@ -299,15 +416,18 @@ export default function JobsPage() {
     let isTypeMatch = true;
     if (searchQueries.title) {
       const q = searchQueries.title.toLowerCase();
-      isTitleMatch = (job.title || "").toLowerCase().includes(q) || (job.company_name || "").toLowerCase().includes(q);
+      isTitleMatch = (job.title || "").toLowerCase().includes(q) || (job.company_name || job.companyName || "").toLowerCase().includes(q);
     }
-    if (searchQueries.location) isLocationMatch = (job.company_location || "").toLowerCase().includes(searchQueries.location.toLowerCase());
-    // if (searchQueries.type) isTypeMatch = (job.type_of_employment || "").toLowerCase().includes(searchQueries.type.toLowerCase());
+    if (searchQueries.location) isLocationMatch = (job.company_location || job.location || "").toLowerCase().includes(searchQueries.location.toLowerCase());
 
-    // Filter checkbox logic
+    // Filter checkbox logic with proper field mapping
     let matchesFilters = true;
     for (const [filterName, selectedValues] of Object.entries(selectedFilters) as [string, string[]][]) {
-      if (selectedValues.length > 0 && !selectedValues.includes(job[filterName])) {
+      if (selectedValues.length === 0) continue; // Skip empty filters
+      
+      const jobValue = getJobValueForFilter(job, filterName);
+      
+      if (!jobValue || !selectedValues.includes(jobValue)) {
         matchesFilters = false;
         break;
       }
@@ -316,11 +436,69 @@ export default function JobsPage() {
     return isTitleMatch && isLocationMatch && isTypeMatch && matchesFilters;
   });
 
-  // counts
+  // Apply sorting
+  jobsToDisplay = [...jobsToDisplay].sort((a, b) => {
+    switch(sortBy) {
+      case "recent":
+        // Most recent first
+        return new Date(b.postedAt || b.posted_at || 0).getTime() - new Date(a.postedAt || a.posted_at || 0).getTime();
+      case "oldest":
+        // Oldest first
+        return new Date(a.postedAt || a.posted_at || 0).getTime() - new Date(b.postedAt || b.posted_at || 0).getTime();
+      case "salary_high":
+        // Highest salary first
+        return (b.maxSalary || 0) - (a.maxSalary || 0);
+      case "salary_low":
+        // Lowest salary first
+        return (a.minSalary || 0) - (b.minSalary || 0);
+      case "urgent_first":
+        // Urgent jobs first
+        return (b.isUrgent ? 1 : 0) - (a.isUrgent ? 1 : 0);
+      default:
+        return 0;
+    }
+  });
+
+  // counts - Calculate based on current filters (excluding the filter being counted)
   const counts: any = {};
   filters.forEach((f) => {
     f.filters.forEach((value: string) => {
-      counts[value] = (allJobs || []).filter((job: any) => job[f.name] === value).length;
+      // Count jobs that match all OTHER active filters
+      const matchingJobs = allJobs.filter((job: any) => {
+        // Apply search filters
+        let isTitleMatch = true;
+        let isLocationMatch = true;
+        if (searchQueries.title) {
+          const q = searchQueries.title.toLowerCase();
+          isTitleMatch = (job.title || "").toLowerCase().includes(q) || (job.company_name || job.companyName || "").toLowerCase().includes(q);
+        }
+        if (searchQueries.location) {
+          isLocationMatch = (job.company_location || job.location || "").toLowerCase().includes(searchQueries.location.toLowerCase());
+        }
+        
+        // Apply all active filters EXCEPT the current filter being counted
+        let matchesOtherFilters = true;
+        for (const [filterName, selectedValues] of Object.entries(selectedFilters) as [string, string[]][]) {
+          // Skip the current filter being counted
+          if (filterName === f.name) continue;
+          if (selectedValues.length === 0) continue;
+          
+          const jobValue = getJobValueForFilter(job, filterName);
+          
+          if (!jobValue || !selectedValues.includes(jobValue)) {
+            matchesOtherFilters = false;
+            break;
+          }
+        }
+        
+        // Check if this job matches the current filter value
+        const currentFilterValue = getJobValueForFilter(job, f.name);
+        const matchesCurrentFilter = currentFilterValue === value;
+        
+        return isTitleMatch && isLocationMatch && matchesOtherFilters && matchesCurrentFilter;
+      });
+      
+      counts[value] = matchingJobs.length;
     });
   });
 
@@ -339,7 +517,10 @@ export default function JobsPage() {
     }
   };
 
-  const reset = () => setSearchQueries({ title: "", location: "" });
+  const reset = () => {
+    setSearchQueries({ title: "", location: "" });
+    setSelectedFilters({});
+  };
 
   return (
     <div className="pt-[12vh] min-h-screen bg-white dark:bg-[#0f2137]">
@@ -362,6 +543,8 @@ export default function JobsPage() {
               handleItemClick={handleItemClick}
               showAutoComplete={showAutoComplete}
               autoCompletedResults={autoCompletedResults}
+              reset={reset}
+              isJobsPage={true}
             />
           </div>
 
@@ -407,9 +590,60 @@ export default function JobsPage() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm dark:text-gray-300">Sort by:</p>
 
-                  <div className="flex items-center gap-2 cursor-pointer">
-                    <span className="text-sm text-primary">Posted Recently</span>
-                    <FiChevronDown className="dark:text-gray-300" />
+                  <div className="relative sort-dropdown-container">
+                    <div 
+                      className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      onClick={() => setShowSortDropdown(!showSortDropdown)}
+                    >
+                      <span className="text-sm text-primary font-medium">
+                        {sortBy === "recent" && "Posted Recently"}
+                        {sortBy === "oldest" && "Oldest First"}
+                        {sortBy === "salary_high" && "Salary: High to Low"}
+                        {sortBy === "salary_low" && "Salary: Low to High"}
+                        {sortBy === "urgent_first" && "Urgent First"}
+                      </span>
+                      <FiChevronDown className={`dark:text-gray-300 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+                    </div>
+
+                    {/* Dropdown menu */}
+                    {showSortDropdown && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                        <div className="py-1">
+                          <button
+                            onClick={() => { setSortBy("recent"); setShowSortDropdown(false); }}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${sortBy === "recent" ? "text-primary font-medium" : "text-gray-700 dark:text-gray-300"}`}
+                          >
+                            Posted Recently
+                          </button>
+                          <button
+                            onClick={() => { setSortBy("oldest"); setShowSortDropdown(false); }}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${sortBy === "oldest" ? "text-primary font-medium" : "text-gray-700 dark:text-gray-300"}`}
+                          >
+                            Oldest First
+                          </button>
+                          <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                          <button
+                            onClick={() => { setSortBy("salary_high"); setShowSortDropdown(false); }}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${sortBy === "salary_high" ? "text-primary font-medium" : "text-gray-700 dark:text-gray-300"}`}
+                          >
+                            Salary: High to Low
+                          </button>
+                          <button
+                            onClick={() => { setSortBy("salary_low"); setShowSortDropdown(false); }}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${sortBy === "salary_low" ? "text-primary font-medium" : "text-gray-700 dark:text-gray-300"}`}
+                          >
+                            Salary: Low to High
+                          </button>
+                          <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                          <button
+                            onClick={() => { setSortBy("urgent_first"); setShowSortDropdown(false); }}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${sortBy === "urgent_first" ? "text-primary font-medium" : "text-gray-700 dark:text-gray-300"}`}
+                          >
+                            Urgent First
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -12,7 +12,8 @@ const JobSearchBar = ({
     searchQueries,
     showAutoComplete,
     autoCompletedResults,
-    reset
+    reset,
+    isJobsPage = false  // New prop to identify if it's on jobs page
 }: any) => {
     const router = useRouter();
     
@@ -43,6 +44,12 @@ const JobSearchBar = ({
     };
 
     const handleSearch = () => {
+        // If on jobs page with reset function, clear filters
+        if (isJobsPage && reset) {
+            reset();
+            return;
+        }
+
         // If parent provides onSearchChange callback, use it
         if (onSearchChange) {
             onSearchChange({ title: titleValue, location: locationValue });
@@ -121,8 +128,7 @@ const JobSearchBar = ({
                                text-sm md:text-base w-full md:w-auto min-w-[120px] 
                                whitespace-nowrap hover:bg-blue-700 transition"
                 >
-                    Find Jobs
-
+                    {isJobsPage ? 'Clear Filters' : 'Find Jobs'}
                 </button>
 
             </div>

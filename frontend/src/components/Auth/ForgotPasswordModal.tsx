@@ -89,11 +89,11 @@ export default function ForgotPasswordModal({
         </h2>
 
         {/* IMAGE */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-3">
           <Image
-            src="/images/security.png"
-            width={150}
-            height={150}
+            src="/images/p.jpg"
+            width={200}
+            height={200}
             alt="security"
           />
         </div>
