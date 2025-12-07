@@ -27,6 +27,11 @@ function getAvatarUrl(avatarUrl: string | undefined, email: string | undefined, 
     // If user has uploaded avatar (including Google avatar), use it
     if (avatarUrl && avatarUrl.trim() !== '') {
         console.log('Using provided avatar URL:', avatarUrl);
+        // If it's a relative path (starts with /uploads), prepend backend server URL
+        if (avatarUrl.startsWith('/uploads')) {
+            return `http://localhost:8080${avatarUrl}`;
+        }
+        // Otherwise return as-is (for Google avatars or full URLs)
         return avatarUrl;
     }
     

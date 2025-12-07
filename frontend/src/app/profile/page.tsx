@@ -4,7 +4,7 @@ import { useState, useContext, useEffect } from "react";
 import Image from "next/image";
 import { AuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { candidateProfileApi } from "@/lib/api";
+import { candidateProfileApi, authApi } from "@/lib/api";
 import { CandidateProfile } from "@/types/profile";
 
 export default function CandidateProfileForm() {
@@ -105,18 +105,27 @@ export default function CandidateProfileForm() {
     const file = e.target.files[0];
     if (file) {
       // Show preview immediately
-      setAvatar(URL.createObjectURL(file));
+      const previewUrl = URL.createObjectURL(file);
+      setAvatar(previewUrl);
       
       try {
         // Upload to backend
         const result = await candidateProfileApi.uploadAvatar(file);
         
-        // Update auth context with new avatar URL
-        if (auth?.user) {
-          auth.user.avatarUrl = `http://localhost:8080${result.avatarUrl}`;
+        // Set the actual uploaded avatar URL
+        const uploadedUrl = `http://localhost:8080${result.avatarUrl}`;
+        setAvatar(uploadedUrl);
+        
+        // Update profile state
+        setProfile({ ...profile, avatarUrl: result.avatarUrl });
+        
+        // Reload user data from backend to update AuthContext with new avatar
+        if (auth?.reloadUser) {
+          await auth.reloadUser();
         }
         
         console.log("Avatar uploaded:", result.message);
+        alert("Avatar uploaded successfully!");
       } catch (error: any) {
         console.error("Error uploading avatar:", error);
         alert(error.response?.data?.message || "Failed to upload avatar");
@@ -125,7 +134,23 @@ export default function CandidateProfileForm() {
     }
   };
 
-  const avatarUrl = avatar || auth.user.avatarUrl || "/images/default-avatar.png";
+  // Priority: temporary upload preview > auth user avatar > default
+  const getAvatarUrl = () => {
+    if (avatar) return avatar; // Temporary upload preview (already has full URL)
+    
+    const userAvatar = auth.user?.avatarUrl;
+    if (userAvatar) {
+      // If it's a relative path, prepend backend server URL
+      if (userAvatar.startsWith('/uploads')) {
+        return `http://localhost:8080${userAvatar}`;
+      }
+      return userAvatar; // For Google avatars or full URLs
+    }
+    
+    return "/images/default-avatar.png"; // Default fallback
+  };
+  
+  const avatarUrl = getAvatarUrl();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-16 px-4 ">

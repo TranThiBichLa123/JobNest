@@ -9,6 +9,7 @@ export interface CandidateProfile {
   yearsOfExperience?: string;
   skills?: string[];
   aboutMe?: string;
+  avatarUrl?: string;
 }
 
 export interface CandidateProfileRequest {

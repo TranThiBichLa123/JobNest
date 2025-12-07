@@ -3,6 +3,14 @@ import { CandidateProfile, CandidateProfileRequest } from '@/types/profile';
 
 export const API_URL = "http://localhost:8080/api";
 
+export const authApi = {
+  // Get current user info
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+};
+
 export const jobApi = {
   // Get category statistics with full category info
   getCategoryStats: async () => {

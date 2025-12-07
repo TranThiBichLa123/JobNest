@@ -20,6 +20,7 @@ public class CandidateProfileResponse {
     private String yearsOfExperience;
     private List<String> skills;
     private String aboutMe;
+    private String avatarUrl;
 
     public CandidateProfileResponse(CandidateProfile profile) {
         this.id = profile.getId();
@@ -34,5 +35,6 @@ public class CandidateProfileResponse {
             ? Arrays.asList(profile.getSkills().split(",")) 
             : List.of();
         this.aboutMe = profile.getAboutMe();
+        this.avatarUrl = profile.getUser() != null ? profile.getUser().getAvatarUrl() : null;
     }
 }

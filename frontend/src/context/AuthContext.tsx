@@ -11,6 +11,7 @@ interface AuthContextType {
   register: (data: RegisterRequest) => Promise<void>;
   refreshToken: () => Promise<void>;
   setUser: (user: User | null) => void;
+  reloadUser: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -82,6 +83,21 @@ export default function AuthProvider({ children }: any) {
     }
   }
 
+  // Reload current user data (useful after profile updates like avatar upload)
+  async function reloadUser() {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    attachToken();
+    
+    try {
+      const res = await api.get<User>("/auth/me");
+      setUser(res.data);
+    } catch (error) {
+      console.error("Failed to reload user:", error);
+    }
+  }
+
   // Load user on mount
   async function loadUser() {
     const token = localStorage.getItem("accessToken");
@@ -131,7 +147,7 @@ export default function AuthProvider({ children }: any) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, refreshToken, setUser, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, refreshToken, setUser, reloadUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
