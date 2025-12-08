@@ -1,5 +1,7 @@
 'use client'
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React from 'react'
 import { BiBriefcase, BiMoney } from 'react-icons/bi';
 import { BsBookmark } from 'react-icons/bs';
@@ -50,16 +52,33 @@ const formatJobType = (type?: string) => {
 };
 
 const JobCard = ({ job }: Props) => {
+    const router = useRouter();
     const salaryRange = formatSalary(job.minSalary, job.maxSalary);
     const jobType = formatJobType(job.type);
 
+    const handleApplyClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Apply button clicked for job:', job.id);
+        console.log('Navigating to:', `/jobs/${job.id}/apply`);
+        router.push(`/jobs/${job.id}/apply`);
+    };
+
     return (
-        <div className='border-[1.5px] border-gray-300 dark:border-gray-700 p-6 rounded-lg relative hover:shadow-lg transition-shadow duration-200 h-full'>
-            {/* Bookmark icon */}
-            <div className='w-7 h-7 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-800 flex items-center transition-all
-            duration-200 justify-center rounded-full flex-col absolute top-4 right-4'>
-                <BsBookmark className='w-3 h-3 dark:text-gray-300' />
-            </div>
+        <Link href={`/jobs/${job.id}`} className='block'>
+            <div className='border-[1.5px] border-gray-300 dark:border-gray-700 p-6 rounded-lg relative hover:shadow-lg transition-shadow duration-200 h-full'>
+                {/* Bookmark icon */}
+                <div 
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // TODO: Implement bookmark functionality
+                    }}
+                    className='w-7 h-7 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-800 flex items-center transition-all
+                    duration-200 justify-center rounded-full flex-col absolute top-4 right-4'
+                >
+                    <BsBookmark className='w-3 h-3 dark:text-gray-300' />
+                </div>
             
             {/* Company and Title */}
             <div className='flex items-center space-x-4'>
@@ -96,19 +115,30 @@ const JobCard = ({ job }: Props) => {
             </div>
 
             {/* Job Type and Urgency - Only 2 badges */}
-            <div className='flex items-center gap-2 mt-4'>
-                {jobType && (
-                    <div className='px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full text-xs text-blue-700 dark:text-blue-300 font-medium'>
-                        {jobType}
-                    </div>
-                )}
-                {job.isUrgent && (
-                    <div className='px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'>
-                        Urgent
-                    </div>
-                )}
+            <div className='flex items-center justify-between gap-2 mt-4'>
+                <div className='flex items-center gap-2'>
+                    {jobType && (
+                        <div className='px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full text-xs text-blue-700 dark:text-blue-300 font-medium'>
+                            {jobType}
+                        </div>
+                    )}
+                    {job.isUrgent && (
+                        <div className='px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'>
+                            Urgent
+                        </div>
+                    )}
+                </div>
+                
+                {/* Apply Button */}
+                <button
+                    onClick={handleApplyClick}
+                    className='px-4 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-medium rounded-md transition-colors'
+                >
+                    Apply
+                </button>
             </div>
         </div>
+        </Link>
     )
 }
 

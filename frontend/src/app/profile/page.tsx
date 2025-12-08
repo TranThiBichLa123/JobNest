@@ -6,6 +6,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { candidateProfileApi, authApi } from "@/lib/api";
 import { CandidateProfile } from "@/types/profile";
+import CVManagement from "@/components/Candidate/CVManagement";
 
 export default function CandidateProfileForm() {
   const auth = useContext(AuthContext);
@@ -54,10 +55,14 @@ export default function CandidateProfileForm() {
       setYearsOfExperience(data.yearsOfExperience || "");
       setSkills(data.skills || []);
       setAboutMe(data.aboutMe || "");
-    } catch (error) {
-      console.error("Error loading profile:", error);
-      // Initialize with default values if profile doesn't exist
-      setFullName(auth?.user?.username || "");
+    } catch (error: any) {
+      // Silently handle 403 (no candidate profile) or 401 (not authenticated)
+      if (error?.response?.status === 403 || error?.response?.status === 401) {
+        // Initialize with default values - user doesn't have candidate profile yet
+        setFullName(auth?.user?.username || "");
+      } else {
+        console.error("Error loading profile:", error);
+      }
     }
   };
 
@@ -153,35 +158,42 @@ export default function CandidateProfileForm() {
   const avatarUrl = getAvatarUrl();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-16 px-4 ">
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">My Profile</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">My Profile</h1>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Personal Profile Form */}
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+              {/* Avatar Section */}
+              <div className="flex items-center gap-6 mb-8 pb-6 border-b dark:border-gray-700">
+                {!imageError && avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    width={90}
+                    height={90}
+                    alt="avatar"
+                    className="w-[90px] h-[90px] rounded-full border-4 border-cyan-100 dark:border-cyan-900 object-cover shadow-md"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="w-[90px] h-[90px] rounded-full border-4 border-cyan-100 dark:border-cyan-900 bg-gradient-to-br from-cyan-600 to-cyan-700 flex items-center justify-center text-white text-3xl font-bold shadow-md">
+                    {auth.user.username?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                )}
 
-        {/* Avatar Section */}
-        <div className="flex items-center gap-6 mb-10">
-          {!imageError && avatarUrl ? (
-            <img
-              src={avatarUrl}
-              width={90}
-              height={90}
-              alt="avatar"
-              className="w-[90px] h-[90px] rounded-full border-2 border-gray-300 dark:border-gray-600 object-cover"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <div className="w-[90px] h-[90px] rounded-full border-2 border-gray-300 dark:border-gray-600 bg-cyan-700 flex items-center justify-center text-white text-2xl font-bold">
-              {auth.user.username?.[0]?.toUpperCase() || 'U'}
-            </div>
-          )}
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Profile Photo</h2>
+                  <label className="cursor-pointer inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-2.5 rounded-lg transition-colors font-medium shadow-sm">
+                    Change Avatar
+                    <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                  </label>
+                </div>
+              </div>
 
-          <label className="cursor-pointer bg-cyan-700 text-white px-4 py-2 rounded-md hover:bg-cyan-800 transition-colors">
-            Upload Avatar
-            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-          </label>
-        </div>
-
-        {/* Personal Information */}
-        <SectionTitle title="Personal Information" />
+              {/* Personal Information */}
+              <SectionTitle title="Personal Information" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <Input 
@@ -248,7 +260,7 @@ export default function CandidateProfileForm() {
         <SectionTitle title="About Me" />
 
         <textarea
-          className="mt-3 w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 h-32 focus:outline-none focus:border-cyan-500"
+          className="mt-4 w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg p-3 h-32 focus:outline-none focus:border-cyan-500 transition-colors"
           placeholder="Write a short introduction about yourself…"
           value={aboutMe}
           onChange={(e) => setAboutMe(e.target.value)}
@@ -258,11 +270,29 @@ export default function CandidateProfileForm() {
         <button 
           type="submit"
           disabled={loading}
-          className="mt-8 w-full bg-cyan-700 text-white py-3 rounded-lg hover:bg-cyan-800 text-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="mt-8 w-full bg-cyan-600 hover:bg-cyan-700 text-white py-3.5 rounded-lg text-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {loading ? "Saving..." : "Save Changes"}
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Saving...
+            </span>
+          ) : "Save Changes"}
         </button>
       </form>
+          </div>
+
+          {/* Right Column - CV Management */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <CVManagement />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -271,11 +301,11 @@ export default function CandidateProfileForm() {
 
 const Input = ({ label, placeholder, type = "text", ...props }: any) => (
   <div>
-    <label className="font-medium dark:text-gray-200">{label}</label>
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{label}</label>
     <input
       type={type}
       placeholder={placeholder}
-      className="mt-1 w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-2 focus:outline-none focus:border-cyan-500"
+      className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500 transition-all"
       {...props}
     />
   </div>
@@ -283,9 +313,9 @@ const Input = ({ label, placeholder, type = "text", ...props }: any) => (
 
 const Select = ({ label, options = [], ...props }: any) => (
   <div>
-    <label className="font-medium dark:text-gray-200">{label}</label>
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{label}</label>
     <select
-      className="mt-1 w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-2 pr-8 bg-white focus:outline-none focus:border-cyan-500 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_0.75rem_center] bg-no-repeat"
+      className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 pr-10 bg-white focus:outline-none focus:border-cyan-500 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_0.75rem_center] bg-no-repeat transition-all"
       {...props}
     >
       <option value="">Select...</option>
@@ -299,7 +329,9 @@ const Select = ({ label, options = [], ...props }: any) => (
 );
 
 const SectionTitle = ({ title }: { title: string }) => (
-  <h2 className="text-xl font-semibold mt-10 border-b dark:border-gray-600 pb-2 dark:text-white">{title}</h2>
+  <div className="mt-8 mb-4">
+    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
+  </div>
 );
 
 /* Tag Input Component */
@@ -319,9 +351,9 @@ const TagInput = ({ label, placeholder, tags, setTags }: any) => {
 
   return (
     <div className="col-span-2">
-      <label className="font-medium dark:text-gray-200">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{label}</label>
 
-      <div className="flex items-center gap-2 mt-1 border dark:border-gray-600 rounded-md p-2 dark:bg-gray-700">
+      <div className="flex items-center gap-2 border dark:border-gray-600 rounded-lg px-4 py-2.5 dark:bg-gray-700 focus-within:border-cyan-500 transition-all">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -332,23 +364,23 @@ const TagInput = ({ label, placeholder, tags, setTags }: any) => {
         <button
           type="button"
           onClick={addTag}
-          className="bg-cyan-700 text-white px-3 py-1 rounded-md hover:bg-cyan-800 transition-colors"
+          className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1.5 rounded-md transition-colors font-medium"
         >
           Add
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2 mt-2">
+      <div className="flex flex-wrap gap-2 mt-3">
         {tags.map((t: string, idx: number) => (
           <span 
             key={idx} 
-            className="px-3 py-1 bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200 rounded-full flex items-center gap-2"
+            className="px-3 py-1.5 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded-lg flex items-center gap-2 font-medium border border-cyan-200 dark:border-cyan-800 transition-colors"
           >
             {t}
             <button
               type="button"
               onClick={() => removeTag(idx)}
-              className="text-cyan-600 dark:text-cyan-300 hover:text-cyan-800 dark:hover:text-cyan-100"
+              className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-200 font-bold"
             >
               ✕
             </button>

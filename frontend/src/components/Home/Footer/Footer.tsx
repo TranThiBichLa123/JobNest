@@ -19,8 +19,9 @@ const Footer = () => {
                     </div>
 
                     <p className='mt-4 text-sm text-gray-600 dark:text-gray-400'>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus animi, omnis ad beatae necessitatibus quaerat! Atque fugiat
-                    </p>
+Dreams don’t follow you — you chase them.
+And every application is a door you choose to open.
+Let today be the day you walk toward your best future                    </p>
                     {/* call */}
                     <div className='mt-5'>
                         <h1 className='lg:text-xl text-base text-gray-700 dark:text-gray-300 font-medium'>Call Us</h1>
@@ -29,8 +30,8 @@ const Footer = () => {
                         </p>
                     </div>
                     {/* address */}
-                    <p className='text-sm text-gray-600 dark:text-gray-400 mt-4'>Bich La</p>
-                    <p className='text-sm text-gray-600 dark:text-gray-400 mt-2'>Thuan Duong</p>
+                    <p className='text-sm text-gray-600 dark:text-gray-400 mt-4'>Tran Thi Bich La</p>
+                    <p className='text-sm text-gray-600 dark:text-gray-400 mt-2'>Luong Thuan Duong</p>
                     <p className='text-sm text-gray-600 dark:text-gray-400 mt-2'>23520827@gm.uit.edu.vn</p>
                 </div>
                 {/* 2nd part */}

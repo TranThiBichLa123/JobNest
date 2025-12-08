@@ -3,10 +3,12 @@
 
 import Link from "next/link";
 import { FiBookmark } from "react-icons/fi";
+import { FaBookmark } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { useAuthModal } from "@/context/AuthModalContext";
+import { savedJobApi } from "@/lib/api";
 
 // Format salary to display (e.g., 80000 -> $80k)
 const formatSalary = (min?: number, max?: number) => {
@@ -54,11 +56,60 @@ const getTimeAgo = (dateString?: string) => {
 const JobList = ({ jobs, loading }: any) => {
   const auth = useContext(AuthContext);
   const { openLoginModal } = useAuthModal();
+  const [savedJobs, setSavedJobs] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    // Check which jobs are saved
+    if (auth?.user && jobs?.length > 0) {
+      jobs.forEach((job: any) => {
+        savedJobApi.checkIfSaved(job.id)
+          .then(res => {
+            if (res.isSaved) {
+              setSavedJobs(prev => new Set(prev).add(job.id));
+            }
+          })
+          .catch((error) => {
+            // Silently ignore auth errors (user not logged in or token expired)
+            if (error.response?.status !== 401 && error.response?.status !== 403) {
+              console.error('Error checking saved status:', error);
+            }
+          });
+      });
+    }
+  }, [auth?.user, jobs]);
 
   const handleApplyClick = (e: React.MouseEvent) => {
     if (!auth?.user) {
       e.preventDefault();
       openLoginModal();
+    }
+  };
+
+  const handleSaveJob = async (e: React.MouseEvent, jobId: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (!auth?.user) {
+      openLoginModal();
+      return;
+    }
+
+    try {
+      const isSaved = savedJobs.has(jobId);
+      if (isSaved) {
+        await savedJobApi.unsaveJob(jobId);
+        setSavedJobs(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(jobId);
+          return newSet;
+        });
+      } else {
+        await savedJobApi.saveJob(jobId);
+        setSavedJobs(prev => new Set(prev).add(jobId));
+      }
+    } catch (error: any) {
+      console.error("Error saving job:", error);
+      alert(error.response?.data?.message || "Failed to save job");
     }
   };
 
@@ -132,6 +183,7 @@ const JobList = ({ jobs, loading }: any) => {
 
                 {/* Save Job */}
                 <button
+                  onClick={(e) => handleSaveJob(e, job.id)}
                   className="
                     flex items-center gap-2 bg-slate-100 
                     dark:bg-[var(--hover-color)]
@@ -140,7 +192,15 @@ const JobList = ({ jobs, loading }: any) => {
                     dark:hover:bg-[#2f3442] transition text-sm
                   "
                 >
-                  <FiBookmark /> Save
+                  {savedJobs.has(job.id) ? (
+                    <>
+                      <FaBookmark className="text-cyan-600" /> Saved
+                    </>
+                  ) : (
+                    <>
+                      <FiBookmark /> Save
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -182,7 +242,7 @@ const JobList = ({ jobs, loading }: any) => {
                   </Link>
 
                   <Link
-                    href="/apply"
+                    href={`/jobs/${job.id}/apply`}
                     onClick={handleApplyClick}
                     className="
                       bg-cyan-700 hover:bg-cyan-800 text-white
