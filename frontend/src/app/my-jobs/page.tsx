@@ -67,20 +67,41 @@ export default function MyJobsPage() {
   const loadData = async () => {
     setLoading(true);
     setError(null);
+    
+    let hasProfileError = false;
+
+    // Load applied jobs
     try {
-      // Load applied jobs
       const appsResponse = await applicationApi.getMyApplications();
       setApplications(appsResponse.content || appsResponse || []);
+    } catch (error: any) {
+      if (error?.response?.status === 403 || error?.response?.status === 401) {
+        hasProfileError = true;
+        setApplications([]);
+      } else {
+        console.error("Error loading applications:", error);
+      }
+    }
 
-      // Load saved jobs
+    // Load saved jobs
+    try {
       const savedResponse = await savedJobApi.getMySavedJobs();
       setSavedJobs(savedResponse.content || savedResponse || []);
+    } catch (error: any) {
+      if (error?.response?.status === 403 || error?.response?.status === 401) {
+        hasProfileError = true;
+        setSavedJobs([]);
+      } else {
+        console.error("Error loading saved jobs:", error);
+      }
+    }
 
-      // Load viewed jobs and remove duplicates (keep only the most recent view of each job)
+    // Load viewed jobs and remove duplicates
+    try {
       const viewedResponse = await jobViewApi.getMyViewedJobs();
       const allViewedJobs = viewedResponse.content || viewedResponse || [];
       
-      // Remove duplicate jobs using a Map to keep only first occurrence (most recent)
+      // Remove duplicate jobs using a Set to keep only first occurrence (most recent)
       const seenJobIds = new Set();
       const uniqueViewedJobs = allViewedJobs.filter((job: any) => {
         if (seenJobIds.has(job.id)) {
@@ -92,17 +113,20 @@ export default function MyJobsPage() {
       
       setViewedJobs(uniqueViewedJobs);
     } catch (error: any) {
-      console.error("Error loading jobs:", error);
-      
-      // Check if it's a 403 error (no candidate profile)
-      if (error.response?.status === 403) {
-        setError("profile_required");
+      if (error?.response?.status === 403 || error?.response?.status === 401) {
+        hasProfileError = true;
+        setViewedJobs([]);
       } else {
-        setError("general");
+        console.error("Error loading viewed jobs:", error);
       }
-    } finally {
-      setLoading(false);
     }
+
+    // Set error state if profile is required
+    if (hasProfileError) {
+      setError("profile_required");
+    }
+
+    setLoading(false);
   };
 
   const handleWithdrawApplication = async (id: number) => {

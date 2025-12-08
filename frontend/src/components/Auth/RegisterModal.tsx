@@ -175,7 +175,7 @@ export default function RegisterModal({
         <div className="flex items-start gap-3 mb-6">
           <input 
             type="checkbox" 
-            className="mt-1 w-5 h-5 accent-cyan-600 cursor-pointer flex-shrink-0" 
+            className="w-5 h-5 accent-cyan-600 cursor-pointer flex-shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded mt-0.9" 
             checked={agreedToTerms}
             onChange={(e) => setAgreedToTerms(e.target.checked)}
           />
