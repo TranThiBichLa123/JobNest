@@ -1,6 +1,7 @@
 package com.jobnest.backend.security.user;
 
 import com.jobnest.backend.entities.Account;
+import com.jobnest.backend.entities.CandidateProfile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,13 +12,27 @@ import java.util.Collections;
 public class CustomUserDetails implements UserDetails {
 
     private final Account account;
+    private Long candidateProfileId;
 
     public CustomUserDetails(Account account) {
         this.account = account;
     }
 
+    public CustomUserDetails(Account account, Long candidateProfileId) {
+        this.account = account;
+        this.candidateProfileId = candidateProfileId;
+    }
+
     public Account getAccount() {
         return this.account;
+    }
+
+    public Long getCandidateProfileId() {
+        return this.candidateProfileId;
+    }
+
+    public void setCandidateProfileId(Long candidateProfileId) {
+        this.candidateProfileId = candidateProfileId;
     }
 
     @Override

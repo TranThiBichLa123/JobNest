@@ -1,7 +1,10 @@
 package com.jobnest.backend.repository;
 
 import com.jobnest.backend.entities.SavedJob;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,6 +16,13 @@ public interface SavedJobRepository extends JpaRepository<SavedJob, SavedJob.Sav
     
     @Query("SELECT sj FROM SavedJob sj WHERE sj.id.userId = :userId")
     List<SavedJob> findByUserId(@Param("userId") Long userId);
+    
+    Page<SavedJob> findByIdUserIdOrderBySavedAtDesc(Long userId, Pageable pageable);
+    
+    boolean existsByIdUserIdAndIdJobId(Long userId, Long jobId);
+    
+    @Modifying
+    void deleteByIdUserIdAndIdJobId(Long userId, Long jobId);
     
     @Query("SELECT COUNT(sj) FROM SavedJob sj WHERE sj.id.jobId = :jobId")
     long countByJobId(@Param("jobId") Long jobId);
