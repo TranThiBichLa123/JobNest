@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
-function useFetch(url: string) {
-  const [data, setData] = useState<any>([]);
+function useFetch<T = any>(url: string) {
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -14,9 +14,9 @@ function useFetch(url: string) {
         
         // Handle paginated responses (Spring Data Page)
         if (json && typeof json === 'object' && 'content' in json) {
-          setData(json.content);
+          setData(json.content as T);
         } else {
-          setData(json);
+          setData(json as T);
         }
         
         setLoading(false);

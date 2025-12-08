@@ -1,5 +1,6 @@
 import api from './axios';
 import { CandidateProfile, CandidateProfileRequest } from '@/types/profile';
+import { ApplicationRequest, ApplicationResponse } from '@/types/applications';
 
 export const API_URL = "http://localhost:8080/api";
 
@@ -50,6 +51,134 @@ export const candidateProfileApi = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return response.data;
+  },
+};
+
+export const applicationApi = {
+  // Apply for a job
+  applyForJob: async (jobId: number, data: ApplicationRequest): Promise<ApplicationResponse> => {
+    const response = await api.post(`/applications/apply/${jobId}`, data);
+    return response.data;
+  },
+
+  // Check if already applied
+  checkIfApplied: async (jobId: number): Promise<{ hasApplied: boolean }> => {
+    const response = await api.get(`/applications/check/${jobId}`);
+    return response.data;
+  },
+
+  // Get my applications
+  getMyApplications: async (page = 0, size = 10) => {
+    const response = await api.get('/applications/my-applications', {
+      params: { page, size }
+    });
+    return response.data;
+  },
+
+  // Withdraw application
+  withdrawApplication: async (applicationId: number): Promise<{ message: string }> => {
+    const response = await api.delete(`/applications/${applicationId}`);
+    return response.data;
+  },
+};
+
+export const savedJobApi = {
+  // Save a job
+  saveJob: async (jobId: number): Promise<{ message: string }> => {
+    const response = await api.post(`/saved-jobs/${jobId}`);
+    return response.data;
+  },
+
+  // Unsave a job
+  unsaveJob: async (jobId: number): Promise<{ message: string }> => {
+    const response = await api.delete(`/saved-jobs/${jobId}`);
+    return response.data;
+  },
+
+  // Check if job is saved
+  checkIfSaved: async (jobId: number): Promise<{ isSaved: boolean }> => {
+    const response = await api.get(`/saved-jobs/check/${jobId}`);
+    return response.data;
+  },
+
+  // Get my saved jobs
+  getMySavedJobs: async (page = 0, size = 10) => {
+    const response = await api.get('/saved-jobs/my-saved-jobs', {
+      params: { page, size }
+    });
+    return response.data;
+  },
+};
+
+export const jobViewApi = {
+  // Record job view
+  recordView: async (jobId: number): Promise<{ message: string }> => {
+    const response = await api.post(`/job-views/${jobId}`);
+    return response.data;
+  },
+
+  // Get my viewed jobs
+  getMyViewedJobs: async (page = 0, size = 10) => {
+    const response = await api.get('/job-views/my-viewed-jobs', {
+      params: { page, size }
+    });
+    return response.data;
+  },
+};
+
+export const cvApi = {
+  // Get all my CVs
+  getMyCVs: async () => {
+    const response = await api.get('/candidate/cvs');
+    return response.data;
+  },
+
+  // Get CV by ID
+  getCVById: async (cvId: number) => {
+    const response = await api.get(`/candidate/cvs/${cvId}`);
+    return response.data;
+  },
+
+  // Get default CV
+  getDefaultCV: async () => {
+    const response = await api.get('/candidate/cvs/default');
+    return response.data;
+  },
+
+  // Create new CV
+  createCV: async (data: {
+    title: string;
+    fileUrl: string;
+    fileName: string;
+    fileSize: number;
+    isDefault?: boolean;
+  }) => {
+    const response = await api.post('/candidate/cvs', data);
+    return response.data;
+  },
+
+  // Update CV
+  updateCV: async (cvId: number, data: {
+    title: string;
+    fileUrl: string;
+    fileName: string;
+    fileSize: number;
+    isDefault?: boolean;
+  }) => {
+    const response = await api.put(`/candidate/cvs/${cvId}`, data);
+    return response.data;
+  },
+
+  // Delete CV
+  deleteCV: async (cvId: number) => {
+    const response = await api.delete(`/candidate/cvs/${cvId}`);
+    return response.data;
+  },
+
+  // Set CV as default
+  setDefaultCV: async (cvId: number) => {
+    const response = await api.put(`/candidate/cvs/${cvId}/set-default`);
     return response.data;
   },
 };

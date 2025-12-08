@@ -47,8 +47,11 @@ export default function AuthProvider({ children }: any) {
     
     try {
       await api.post("/auth/logout", { refreshToken: refreshTok });
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch (error: any) {
+      // Silently ignore 403/401 errors - logout should succeed locally even if server rejects it
+      if (error?.response?.status !== 403 && error?.response?.status !== 401) {
+        console.error("Logout error:", error);
+      }
     }
 
     localStorage.removeItem("accessToken");
