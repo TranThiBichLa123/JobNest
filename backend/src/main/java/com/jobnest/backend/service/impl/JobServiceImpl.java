@@ -33,8 +33,21 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Page<JobResponse> getAllActiveJobs(Pageable pageable) {
-        return jobRepository.findByStatus(Job.JobStatus.active, pageable)
-                .map(this::convertToResponse);
+        // Use fetch join to avoid LazyInitializationException
+        List<Job> jobs = jobRepository.findByStatusWithCategory(Job.JobStatus.active);
+        List<JobResponse> responses = jobs.stream().map(this::convertToResponse).collect(Collectors.toList());
+        // Manually create a Page from the list (since fetch join disables pagination)
+        int pageSize = pageable.getPageSize();
+        int currentPage = pageable.getPageNumber();
+        int startItem = currentPage * pageSize;
+        List<JobResponse> pageContent;
+        if (jobs.size() < startItem) {
+            pageContent = List.of();
+        } else {
+            int toIndex = Math.min(startItem + pageSize, jobs.size());
+            pageContent = responses.subList(startItem, toIndex);
+        }
+        return new org.springframework.data.domain.PageImpl<>(pageContent, pageable, jobs.size());
     }
 
     @Override

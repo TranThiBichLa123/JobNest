@@ -15,6 +15,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     
     // Candidate queries - only active jobs
     Page<Job> findByStatus(Job.JobStatus status, Pageable pageable);
+
+       // Fetch jobs with category eagerly to avoid LazyInitializationException
+       @Query("SELECT j FROM Job j LEFT JOIN FETCH j.category WHERE j.status = :status")
+       List<Job> findByStatusWithCategory(@Param("status") Job.JobStatus status);
     
     @Query("SELECT j FROM Job j WHERE j.status = 'active' AND " +
            "(LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +

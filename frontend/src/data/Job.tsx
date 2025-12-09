@@ -6,7 +6,7 @@ import useFetch from '@/hooks/useFetch'
 import { server } from '@/lib/config'
 
 const Job = () => {
-    const { data: jobs = [], loading } = useFetch(`${server}/api/jobs?size=9`);
+    const { data: jobs, loading } = useFetch(`${server}/api/jobs?size=9`);
 
     return (
         <div className='pt-16 pb-16 '>
@@ -20,18 +20,17 @@ const Job = () => {
                     <p className='mt-4 text-gray-600 dark:text-gray-400'>Loading featured jobs...</p>
                 </div>
             ) : (
-                <div className='w-[95%] sm:w-[80%] mt-16 mx-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10
-                items-center'>
-                    {jobs.slice(0, 9).map((job: any, index: number) => {
-                        return <div key={job.id}
-                        data-aos="fade-up"
-                        data-aos-anchor-placement="top-center"
-                        data-aos-delay={index*100}
+                <div className='w-[95%] sm:w-[80%] mt-16 mx-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10 items-center'>
+                    {(Array.isArray(jobs) ? jobs : []).slice(0, 9).map((job: any, index: number) => (
+                        <div key={job.id}
+                            data-aos="fade-up"
+                            data-aos-anchor-placement="top-center"
+                            data-aos-delay={index*100}
                         >
-                        <JobCard job={job} />
-                    </div>
-                })}
-            </div>
+                            <JobCard job={job} />
+                        </div>
+                    ))}
+                </div>
             )}
             <div className='mt-10 text-center'>
                 <div>

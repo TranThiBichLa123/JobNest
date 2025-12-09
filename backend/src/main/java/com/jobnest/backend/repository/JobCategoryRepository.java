@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.jobnest.backend.entities.Job;
 
 @Repository
 public interface JobCategoryRepository extends JpaRepository<JobCategory, Long> {
@@ -15,6 +18,6 @@ public interface JobCategoryRepository extends JpaRepository<JobCategory, Long> 
     
     Optional<JobCategory> findByName(String name);
     
-    @Query("SELECT c FROM JobCategory c ORDER BY c.name ASC")
-    List<JobCategory> findAllOrderByName();
+    @Query("SELECT j FROM Job j LEFT JOIN FETCH j.category WHERE j.status = 'active'")
+Page<Job> findByStatusWithCategory(Job.JobStatus status, Pageable pageable);
 }
