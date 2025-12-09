@@ -146,11 +146,11 @@ const JobList = ({ jobs, loading }: any) => {
                   <div className="flex-1">
                     <Link
                       href={`/jobs/${job.id}`}
-                      className="hover:text-primary transition"
+                      className="group"
                     >
-                      <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                      <h1 className="text-base font-semibold dark:text-white hover:text-cyan-700 dark:hover:text-blue-400 transition-colors cursor-pointer line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                         {job.title}
-                      </h2>
+                      </h1>
                     </Link>
 
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
