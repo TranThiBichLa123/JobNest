@@ -1,7 +1,6 @@
 package com.jobnest.backend.security.user;
 
 import com.jobnest.backend.entities.Account;
-import com.jobnest.backend.entities.CandidateProfile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,7 +38,7 @@ public class CustomUserDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Return role as authority with ROLE_ prefix (required by Spring Security)
         return Collections.singletonList(
-            new SimpleGrantedAuthority("ROLE_" + account.getRole().name())
+        new SimpleGrantedAuthority("ROLE_" + account.getRole().name())
         );
     }
 

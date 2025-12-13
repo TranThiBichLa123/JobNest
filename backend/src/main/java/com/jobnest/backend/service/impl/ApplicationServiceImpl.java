@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
 import java.time.LocalDateTime;
 
 @Service
@@ -24,6 +26,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final CandidateProfileRepository candidateProfileRepository;
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
@@ -67,7 +71,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Page<ApplicationResponse> getCandidateApplications(Long candidateId, Pageable pageable) {
-        Page<Application> applications = applicationRepository.findByCandidateId(candidateId, pageable);
+        Page<Application> applications = applicationRepository.findByCandidateIdWithDetails(candidateId, pageable);
         return applications.map(ApplicationResponse::new);
     }
 
@@ -89,6 +93,12 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.setReviewedAt(LocalDateTime.now());
 
         Application updated = applicationRepository.save(application);
+
+        // Send WebSocket notification to candidate
+        Long candidateId = application.getCandidate().getId();
+        String notification = "Your application status has been updated to: " + status;
+        messagingTemplate.convertAndSend("/topic/notifications/" + candidateId, notification);
+
         return new ApplicationResponse(updated);
     }
 

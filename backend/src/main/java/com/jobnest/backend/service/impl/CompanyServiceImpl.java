@@ -1,9 +1,13 @@
 package com.jobnest.backend.service.impl;
 
+import com.jobnest.backend.dto.request.CreateCompanyRequest;
 import com.jobnest.backend.dto.response.CompanyResponse;
+import com.jobnest.backend.entities.Account;
+import com.jobnest.backend.entities.Company;
 import com.jobnest.backend.repository.CompanyRepository;
 import com.jobnest.backend.service.CompanyService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,4 +35,37 @@ public class CompanyServiceImpl implements CompanyService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    @Override
+public CompanyResponse createCompany(Account employer, CreateCompanyRequest req) {
+
+    if (employer.getRole() != Account.Role.EMPLOYER) {
+        throw new IllegalArgumentException("Only employer can create company");
+    }
+
+    if (companyRepository.existsByEmployerIdAndName(employer.getId(), req.getName())) {
+        throw new IllegalArgumentException("You already have a company with this name");
+    }
+
+    Company company = new Company();
+    company.setEmployerId(employer.getId());
+    company.setName(req.getName());
+    company.setLogoUrl(req.getLogoUrl());
+    company.setIndustry(req.getIndustry());
+    company.setAddress(req.getAddress());
+    company.setVerified(false);
+
+    Company saved = companyRepository.save(company);
+
+    return new CompanyResponse(
+        saved.getId(),
+        saved.getName(),
+        saved.getLogoUrl(),
+        saved.getIndustry(),
+        saved.getAddress(),
+        saved.getVerified(),
+        0L
+    );
+}
+
 }

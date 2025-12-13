@@ -1,7 +1,10 @@
 package com.jobnest.backend.service.impl;
 
 import com.jobnest.backend.dto.response.JobCategoryResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jobnest.backend.dto.request.ExtendJobRequest;
+import com.jobnest.backend.dto.request.JobCategoryRequest;
 import com.jobnest.backend.dto.request.JobRequest;
 import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.entities.*;
@@ -34,7 +37,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public Page<JobResponse> getAllActiveJobs(Pageable pageable) {
         // Use fetch join to avoid LazyInitializationException
-        List<Job> jobs = jobRepository.findByStatusWithCategory(Job.JobStatus.active);
+        List<Job> jobs = jobRepository.findByStatusWithCategory(Job.JobStatus.ACTIVE);
         List<JobResponse> responses = jobs.stream().map(this::convertToResponse).collect(Collectors.toList());
         // Manually create a Page from the list (since fetch join disables pagination)
         int pageSize = pageable.getPageSize();
@@ -85,17 +88,18 @@ public class JobServiceImpl implements JobService {
         }
         return response;
     }
+
     @Override
     public List<JobCategoryResponse> getCategoryStats() {
         List<Object[]> results = jobRepository.countActiveJobsByCategory();
         return results.stream()
                 .map(row -> new JobCategoryResponse(
-                        (Long) row[0],    // id
-                        (String) row[1],  // name
-                        (String) row[2],  // slug
-                        (String) row[3],  // iconUrl
-                        null,             // description (not needed for stats)
-                        (Long) row[4]     // openPositions
+                        (Long) row[0], // id
+                        (String) row[1], // name
+                        (String) row[2], // slug
+                        (String) row[3], // iconUrl
+                        null, // description (not needed for stats)
+                        (Long) row[4] // openPositions
                 ))
                 .collect(Collectors.toList());
     }
@@ -134,7 +138,7 @@ public class JobServiceImpl implements JobService {
         job.setEducation(request.getEducation());
         job.setSkills(request.getSkills());
         job.setIsUrgent(request.getIsUrgent());
-        job.setStatus(Job.JobStatus.active);
+        job.setStatus(Job.JobStatus.ACTIVE);
         job.setExpiresAt(LocalDateTime.now().plusDays(30)); // Default 30 days
 
         Job saved = jobRepository.save(job);
@@ -191,7 +195,7 @@ public class JobServiceImpl implements JobService {
             throw new RuntimeException("Not authorized to hide this job");
         }
 
-        job.setStatus(Job.JobStatus.hidden);
+        job.setStatus(Job.JobStatus.HIDDEN);
         jobRepository.save(job);
     }
 
@@ -205,7 +209,7 @@ public class JobServiceImpl implements JobService {
             throw new RuntimeException("Not authorized to unhide this job");
         }
 
-        job.setStatus(Job.JobStatus.active);
+        job.setStatus(Job.JobStatus.ACTIVE);
         jobRepository.save(job);
     }
 
@@ -219,10 +223,10 @@ public class JobServiceImpl implements JobService {
             throw new RuntimeException("Not authorized to extend this job");
         }
 
-        LocalDateTime newExpiresAt = job.getExpiresAt() != null 
+        LocalDateTime newExpiresAt = job.getExpiresAt() != null
                 ? job.getExpiresAt().plusDays(request.getDays())
                 : LocalDateTime.now().plusDays(request.getDays());
-        
+
         job.setExpiresAt(newExpiresAt);
         jobRepository.save(job);
     }
@@ -235,10 +239,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobResponse> getAllEmployerJobs(Long employerId) {
-        return jobRepository.findByEmployerId(employerId).stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-    }
+       return jobRepository.findByEmployerIdWithCategory(employerId)
+        .stream()
+        .map(this::convertToResponse)
+        .collect(Collectors.toList());}
+
 
     // ==================== ADMIN OPERATIONS ====================
 
@@ -254,10 +259,10 @@ public class JobServiceImpl implements JobService {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        job.setStatus(Job.JobStatus.active);
+        job.setStatus(Job.JobStatus.ACTIVE);
         jobRepository.save(job);
 
-        logAdminAction(adminId, "APPROVE_JOB", "Job", jobId, 
+        logAdminAction(adminId, "APPROVE_JOB", "Job", jobId,
                 "Approved job: " + job.getTitle());
     }
 
@@ -267,10 +272,10 @@ public class JobServiceImpl implements JobService {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        job.setStatus(Job.JobStatus.hidden);
+        job.setStatus(Job.JobStatus.HIDDEN);
         jobRepository.save(job);
 
-        logAdminAction(adminId, "REJECT_JOB", "Job", jobId, 
+        logAdminAction(adminId, "REJECT_JOB", "Job", jobId,
                 "Rejected job: " + job.getTitle());
     }
 
@@ -280,10 +285,10 @@ public class JobServiceImpl implements JobService {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        job.setStatus(Job.JobStatus.hidden);
+        job.setStatus(Job.JobStatus.HIDDEN);
         jobRepository.save(job);
 
-        logAdminAction(adminId, "HIDE_JOB", "Job", jobId, 
+        logAdminAction(adminId, "HIDE_JOB", "Job", jobId,
                 "Hidden job: " + job.getTitle());
     }
 
@@ -293,10 +298,10 @@ public class JobServiceImpl implements JobService {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        job.setStatus(Job.JobStatus.active);
+        job.setStatus(Job.JobStatus.ACTIVE);
         jobRepository.save(job);
 
-        logAdminAction(adminId, "RESTORE_JOB", "Job", jobId, 
+        logAdminAction(adminId, "RESTORE_JOB", "Job", jobId,
                 "Restored job: " + job.getTitle());
     }
 
@@ -307,7 +312,7 @@ public class JobServiceImpl implements JobService {
     public void saveJob(Long userId, Long jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
-        
+
         Account user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -318,8 +323,8 @@ public class JobServiceImpl implements JobService {
         if (!savedJobRepository.existsById(id)) {
             SavedJob savedJob = new SavedJob();
             savedJob.setId(id);
-            savedJob.setUser(user);  // Set the user entity
-            savedJob.setJob(job);    // Set the job entity
+            savedJob.setUser(user); // Set the user entity
+            savedJob.setJob(job); // Set the job entity
             savedJobRepository.save(savedJob);
         }
     }
@@ -335,7 +340,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobResponse> getSavedJobs(Long userId) {
-        return savedJobRepository.findByUserId(userId).stream()
+        return savedJobRepository.findByUserIdWithJob(userId, Pageable.unpaged()).stream()
                 .map(savedJob -> {
                     Job job = savedJob.getJob();
                     JobResponse response = convertToResponse(job);
@@ -349,12 +354,12 @@ public class JobServiceImpl implements JobService {
 
     private JobResponse convertToResponse(Job job) {
         JobResponse response = new JobResponse(job);
-        
+
         // Get employer name
         userRepository.findById(job.getEmployerId()).ifPresent(account -> {
             response.setEmployerName(account.getUsername());
         });
-        
+
         // Get company info if companyId exists
         if (job.getCompanyId() != null) {
             companyRepository.findById(job.getCompanyId()).ifPresent(company -> {
@@ -362,18 +367,69 @@ public class JobServiceImpl implements JobService {
                 response.setCompanyLogo(company.getLogoUrl());
             });
         }
-        
+
         return response;
     }
 
-    private void logAdminAction(Long adminId, String action, String targetType, 
-                                 Long targetId, String details) {
+    private void logAdminAction(
+            Long adminId,
+            String action,
+            String targetType,
+            Long targetId,
+            String message) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode details = mapper.createObjectNode();
+        details.put("message", message);
+        details.put("time", LocalDateTime.now().toString());
+
         AuditLog log = new AuditLog();
         log.setAdminId(adminId);
         log.setAction(action);
         log.setTargetType(targetType);
         log.setTargetId(targetId);
         log.setDetails(details);
+
         auditLogRepository.save(log);
     }
+
+    @Override
+    @Transactional
+    public JobCategoryResponse createCategory(JobCategoryRequest request) {
+
+        // 1. Check trùng name
+        if (jobCategoryRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new RuntimeException("Job category already exists");
+        }
+
+        // 2. Sinh slug từ name
+        String slug = request.getName()
+                .toLowerCase()
+                .trim()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("(^-|-$)", "");
+
+        // 3. Check trùng slug (PHẢI CÓ)
+        if (jobCategoryRepository.existsBySlug(slug)) {
+            throw new RuntimeException("Job category slug already exists");
+        }
+
+        // 4. Build entity (ĐẦY ĐỦ FIELD BẮT BUỘC)
+        JobCategory category = JobCategory.builder()
+                .name(request.getName())
+                .slug(slug)
+                .description(request.getDescription())
+                .build();
+
+        // 5. Save
+        JobCategory savedCategory = jobCategoryRepository.save(category);
+
+        // 6. Response
+        return JobCategoryResponse.builder()
+                .id(savedCategory.getId())
+                .name(savedCategory.getName())
+                .slug(savedCategory.getSlug())
+                .description(savedCategory.getDescription())
+                .build();
+    }
+
 }

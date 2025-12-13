@@ -1,7 +1,6 @@
 package com.jobnest.backend.service.impl;
 
 import com.jobnest.backend.dto.response.JobResponse;
-import com.jobnest.backend.entities.Job;
 import com.jobnest.backend.entities.SavedJob;
 import com.jobnest.backend.repository.JobRepository;
 import com.jobnest.backend.repository.SavedJobRepository;
@@ -58,11 +57,12 @@ public class SavedJobServiceImpl implements SavedJobService {
     }
 
     @Override
-    public Page<JobResponse> getSavedJobs(Long userId, Pageable pageable) {
-        Page<SavedJob> savedJobs = savedJobRepository.findByIdUserIdOrderBySavedAtDesc(userId, pageable);
-        return savedJobs.map(savedJob -> {
-            Job job = savedJob.getJob();
-            return new JobResponse(job);
-        });
-    }
+public Page<JobResponse> getSavedJobs(Long userId, Pageable pageable) {
+
+    Page<SavedJob> savedJobs =
+            savedJobRepository.findByUserIdWithJob(userId, pageable);
+
+    return savedJobs.map(sj -> new JobResponse(sj.getJob()));
+}
+
 }

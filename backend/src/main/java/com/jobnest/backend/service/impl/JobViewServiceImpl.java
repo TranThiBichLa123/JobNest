@@ -1,9 +1,7 @@
 package com.jobnest.backend.service.impl;
 
 import com.jobnest.backend.dto.response.JobResponse;
-import com.jobnest.backend.entities.Job;
 import com.jobnest.backend.entities.JobView;
-import com.jobnest.backend.repository.JobRepository;
 import com.jobnest.backend.repository.JobViewRepository;
 import com.jobnest.backend.service.JobViewService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +19,6 @@ public class JobViewServiceImpl implements JobViewService {
     @Autowired
     private JobViewRepository jobViewRepository;
 
-    @Autowired
-    private JobRepository jobRepository;
-
     @Override
     @Transactional
     public void recordView(Long jobId, Long viewerId, String viewerIp) {
@@ -31,10 +26,10 @@ public class JobViewServiceImpl implements JobViewService {
         if (viewerId != null) {
             LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
             Optional<JobView> recentView = jobViewRepository
-                .findFirstByJobIdAndViewerIdAndViewedAtAfterOrderByViewedAtDesc(
-                    jobId, viewerId, oneHourAgo);
+                    .findFirstByJobIdAndViewerIdAndViewedAtAfterOrderByViewedAtDesc(
+                            jobId, viewerId, oneHourAgo);
             if (recentView.isPresent()) {
-                return; // Don't record duplicate view
+                return;
             }
         }
 
@@ -44,15 +39,15 @@ public class JobViewServiceImpl implements JobViewService {
         jobView.setViewerIp(viewerIp);
         jobViewRepository.save(jobView);
     }
+@Override
+public Page<JobResponse> getViewedJobs(Long viewerId, Pageable pageable) {
 
-    @Override
-    public Page<JobResponse> getViewedJobs(Long viewerId, Pageable pageable) {
-        Page<JobView> jobViews = jobViewRepository.findByViewerIdOrderByViewedAtDesc(viewerId, pageable);
-        return jobViews.map(jobView -> {
-            Job job = jobView.getJob();
-            return new JobResponse(job);
-        });
-    }
+    Page<JobView> jobViews =
+            jobViewRepository.findByViewerIdWithJob(viewerId, pageable);
+
+    return jobViews.map(jv -> new JobResponse(jv.getJob()));
+}
+
 
     @Override
     public Long getViewCount(Long jobId) {

@@ -2,9 +2,9 @@ package com.jobnest.backend.service;
 
 import com.jobnest.backend.dto.response.JobCategoryResponse;
 import com.jobnest.backend.dto.request.ExtendJobRequest;
+import com.jobnest.backend.dto.request.JobCategoryRequest;
 import com.jobnest.backend.dto.request.JobRequest;
 import com.jobnest.backend.dto.response.JobResponse;
-import com.jobnest.backend.entities.Job;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -19,7 +19,8 @@ public interface JobService {
     
     // Category stats
     List<JobCategoryResponse> getCategoryStats();
-    
+    JobCategoryResponse createCategory(JobCategoryRequest request);
+
     // Employer operations
     JobResponse createJob(Long employerId, JobRequest request);
     JobResponse updateJob(Long employerId, Long jobId, JobRequest request);

@@ -20,8 +20,8 @@ public class CandidateProfileServiceImpl implements CandidateProfileService {
 
     @Override
     public CandidateProfileResponse getProfile(Long userId) {
-        CandidateProfile profile = candidateProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
+        CandidateProfile profile = candidateProfileRepository.findByUser_Id(userId)
+            .orElseThrow(() -> new RuntimeException("Profile not found"));
         return new CandidateProfileResponse(profile);
     }
 
@@ -31,8 +31,8 @@ public class CandidateProfileServiceImpl implements CandidateProfileService {
         Account user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        CandidateProfile profile = candidateProfileRepository.findByUserId(userId)
-                .orElse(new CandidateProfile());
+        CandidateProfile profile = candidateProfileRepository.findByUser_Id(userId)
+            .orElse(new CandidateProfile());
 
         if (profile.getUser() == null) {
             profile.setUser(user);

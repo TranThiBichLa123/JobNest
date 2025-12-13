@@ -30,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         // If user is a candidate, fetch their profile ID
         if (account.getRole() == Account.Role.CANDIDATE) {
-            Optional<CandidateProfile> profile = candidateProfileRepository.findByUserId(account.getId());
+            Optional<CandidateProfile> profile = candidateProfileRepository.findByUser_Id(account.getId());
             profile.ifPresent(p -> userDetails.setCandidateProfileId(p.getId()));
         }
         
