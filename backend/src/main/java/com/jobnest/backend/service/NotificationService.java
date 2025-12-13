@@ -2,6 +2,7 @@ package com.jobnest.backend.service;
 
 import com.jobnest.backend.dto.response.NotificationResponse;
 import com.jobnest.backend.entities.Account;
+import com.jobnest.backend.entities.Application;
 import com.jobnest.backend.entities.Job;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +43,11 @@ public interface NotificationService {
     void notifyCandidateAppliedJob(
         Account candidate,
         Job job
+    );
+
+    void notifyApplicationStatusChanged(
+        Account candidate,
+        Application application
     );
 
     List<NotificationResponse> getNotificationsByUser(Account account);

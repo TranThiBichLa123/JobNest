@@ -116,6 +116,12 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Application updated = applicationRepository.save(application);
 
+        // 🔔 MISSING PART – BỔ SUNG Ở ĐÂY
+        notificationService.notifyApplicationStatusChanged(
+            application.getCandidate().getUser(), // Account của candidate
+            application
+        );
+
         // Send WebSocket notification to candidate
         Long candidateId = application.getCandidate().getId();
         String notification = "Your application status has been updated to: " + status;

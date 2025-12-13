@@ -4,6 +4,7 @@ import com.jobnest.backend.dto.response.NotificationResponse;
 import com.jobnest.backend.entities.Notification;
 import com.jobnest.backend.entities.Account;
 import com.jobnest.backend.entities.Job;
+import com.jobnest.backend.entities.Application;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -139,6 +140,32 @@ public class NotificationServiceImpl implements NotificationService {
         );
     }
 
+    @Override
+    public void notifyApplicationStatusChanged(Account candidate, Application application) {
+        Notification notification = new Notification();
+        notification.setRecipient(candidate);
+        notification.setTitle("Application Status Updated");
+        notification.setMessage(
+            "Your application status for the position "
+            + application.getJob().getTitle()
+            + " has been updated to: "
+            + application.getStatus().name()
+        );
+        notification.setType(Notification.NotificationType.APPLICATION_STATUS_CHANGED);
+        notification.setReferenceId(application.getId());
+        notification.setIsRead(false);
+        notification.setCreatedAt(LocalDateTime.now());
+
+        notificationRepository.save(notification);
+
+        // Gửi real-time notification qua WebSocket
+        NotificationResponse notificationResponse = toDto(notification);
+        messagingTemplate.convertAndSendToUser(
+            candidate.getId().toString(),
+            "/queue/notifications",
+            notificationResponse
+        );
+    }
 
     @Override
     public List<NotificationResponse> getNotificationsByUser(Account account) {
