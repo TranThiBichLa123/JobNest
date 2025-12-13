@@ -1,8 +1,9 @@
 import api from './axios';
+import { API_URL } from './config';
 import { CandidateProfile, CandidateProfileRequest } from '@/types/profile';
 import { ApplicationRequest, ApplicationResponse } from '@/types/applications';
 
-export const API_URL = "http://localhost:8080/api";
+export { API_URL };
 
 export const authApi = {
   // Get current user info

@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useState, useEffect } from "react";
-import api from "../lib/axios";
+import api from "@/lib/axios";
 import { User, LoginRequest, RegisterRequest, AuthResponse } from "@/types/user";
 
 // Define context type

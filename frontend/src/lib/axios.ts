@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "./api";
+import { API_URL } from "./config";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || API_URL,
@@ -11,7 +11,15 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      // Ensure headers object exists (some axios versions may set it as undefined initially)
+      // Use AxiosRequestHeaders type and set method if available
+      if (config.headers && typeof config.headers.set === "function") {
+        config.headers.set("Authorization", `Bearer ${token}`);
+      } else {
+        (config.headers as any)["Authorization"] = `Bearer ${token}`;
+      }
+      // Optional debug log to help diagnose header forwarding
+      // console.debug("Axios: Adding Authorization header", { url: config.url });
     }
     return config;
   },
