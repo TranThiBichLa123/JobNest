@@ -28,7 +28,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/candidate/profile")
 @RequiredArgsConstructor
-@Tag(name = "3. Candidate Profile", description = "Candidate profile management APIs")
+@Tag(name = "03. Candidate Profile", description = "Candidate profile management APIs")
 public class CandidateProfileController {
 
     private final CandidateProfileService candidateProfileService;

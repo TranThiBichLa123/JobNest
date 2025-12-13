@@ -3,6 +3,7 @@ package com.jobnest.backend.controllers;
 import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.JobViewService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
+
 @RequestMapping("/api/job-views")
+@Tag(name = "06. Job Views", description = "Track and manage job view history")
 public class JobViewController {
 
     @Autowired

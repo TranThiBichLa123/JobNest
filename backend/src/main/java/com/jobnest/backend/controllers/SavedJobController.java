@@ -3,6 +3,7 @@ package com.jobnest.backend.controllers;
 import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.SavedJobService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/saved-jobs")
+@Tag(name = "07. Saved Jobs", description = "Bookmark and manage saved jobs")
 public class SavedJobController {
 
     @Autowired

@@ -19,7 +19,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/applications")
 @RequiredArgsConstructor
-@Tag(name = "5. Applications", description = "Job application management APIs")
+@Tag(name = "08. Applications", description = "Job application management APIs")
 public class ApplicationController {
 
     private final ApplicationService applicationService;

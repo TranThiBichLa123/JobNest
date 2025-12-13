@@ -5,13 +5,14 @@ import com.jobnest.backend.dto.request.JobRequest;
 import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.JobService;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/employers")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('EMPLOYER')")
+@Tag(name = "09. Employer Jobs", description = "Job listing and management APIs for employers")
 public class EmployerJobController {
 
     private final JobService jobService;
@@ -116,7 +117,6 @@ public class EmployerJobController {
      * This can be accessed by anyone to see employer's job listings
      */
     @GetMapping("/{id}/jobs")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<List<JobResponse>> getEmployerJobs(@PathVariable Long id) {
         List<JobResponse> jobs = jobService.getAllEmployerJobs(id);
         return ResponseEntity.ok(jobs);

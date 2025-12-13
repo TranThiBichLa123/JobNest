@@ -3,6 +3,8 @@ package com.jobnest.backend.controllers;
 import com.jobnest.backend.dto.response.JobResponse;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.JobService;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin/jobs")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "04. Admin Jobs", description = "Admin job management APIs")
+
 public class AdminJobController {
 
     private final JobService jobService;
@@ -91,4 +95,6 @@ public class AdminJobController {
         jobService.restoreJob(userDetails.getAccount().getId(), id);
         return ResponseEntity.ok("Job restored successfully");
     }
+
+    
 }
