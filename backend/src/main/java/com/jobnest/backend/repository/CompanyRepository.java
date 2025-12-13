@@ -16,7 +16,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     
     // Get top companies with active job counts
     @Query("SELECT c.id, c.name, c.logoUrl, c.industry, c.address, c.verified, COUNT(j.id) " +
-           "FROM Company c LEFT JOIN Job j ON c.id = j.companyId AND j.status = 'active' " +
+           "FROM Company c LEFT JOIN Job j ON c.id = j.companyId AND j.status = 'ACTIVE' " +
            "GROUP BY c.id, c.name, c.logoUrl, c.industry, c.address, c.verified " +
            "HAVING COUNT(j.id) > 0 " +
            "ORDER BY COUNT(j.id) DESC")

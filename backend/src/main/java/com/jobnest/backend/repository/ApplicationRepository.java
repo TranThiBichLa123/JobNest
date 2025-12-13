@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,4 +33,27 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     
     // Find application by job and candidate
     Optional<Application> findByJobIdAndCandidateId(Long jobId, Long candidateId);
+
+    @Query(
+        value = """
+            select a
+            from Application a
+            join fetch a.job j
+            left join fetch j.category
+            join fetch a.candidate c
+            join fetch c.user u
+            left join fetch a.cv cv
+            where c.id = :candidateId
+            order by a.appliedAt desc
+        """,
+        countQuery = """
+            select count(a)
+            from Application a
+            where a.candidate.id = :candidateId
+        """
+    )
+    Page<Application> findByCandidateIdWithDetails(
+            @Param("candidateId") Long candidateId,
+            Pageable pageable
+    );
 }

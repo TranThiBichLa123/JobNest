@@ -1,7 +1,9 @@
 package com.jobnest.backend.repository;
+
 import com.jobnest.backend.entities.Account;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 
 @Repository
@@ -11,3 +13,6 @@ public interface UserRepository extends JpaRepository<Account, Long> {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 }
+
+// If you have a public interface AccountRepository here, remove it from this file
+// and create a new file named AccountRepository.java with its definition.

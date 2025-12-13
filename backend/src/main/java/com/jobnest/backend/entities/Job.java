@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+
 @Entity
 @Table(name = "jobs")
 @Data
@@ -57,7 +58,7 @@ public class Job {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private JobStatus status = JobStatus.active;
+    private JobStatus status = JobStatus.ACTIVE;
 
     @Column(name = "posted_at", nullable = false, updatable = false)
     private LocalDateTime postedAt = LocalDateTime.now();
@@ -81,11 +82,12 @@ public class Job {
     private JobCategory category;
 
     public enum JobType {
-        fulltime, parttime, intern, remote
+        FULLTIME, PARTTIME, INTERNSHIP, CONTRACT;
+
     }
 
     public enum JobStatus {
-        active, hidden, expired
+        ACTIVE, HIDDEN, EXPIRED
     }
 
     @PreUpdate

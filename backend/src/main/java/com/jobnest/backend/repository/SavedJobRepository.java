@@ -4,30 +4,29 @@ import com.jobnest.backend.entities.SavedJob;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface SavedJobRepository extends JpaRepository<SavedJob, SavedJob.SavedJobId> {
-    
-    @Query("SELECT sj FROM SavedJob sj WHERE sj.id.userId = :userId")
-    List<SavedJob> findByUserId(@Param("userId") Long userId);
-    
-    Page<SavedJob> findByIdUserIdOrderBySavedAtDesc(Long userId, Pageable pageable);
-    
+
+    @Query("""
+        select sj
+        from SavedJob sj
+        join fetch sj.job j
+        left join fetch j.category c
+        where sj.id.userId = :userId
+        order by sj.savedAt desc
+    """)
+    Page<SavedJob> findByUserIdWithJob(
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
+
     boolean existsByIdUserIdAndIdJobId(Long userId, Long jobId);
-    
-    @Modifying
+
     void deleteByIdUserIdAndIdJobId(Long userId, Long jobId);
-    
-    @Query("SELECT COUNT(sj) FROM SavedJob sj WHERE sj.id.jobId = :jobId")
-    long countByJobId(@Param("jobId") Long jobId);
-    
-    @Query("SELECT CASE WHEN COUNT(sj) > 0 THEN true ELSE false END FROM SavedJob sj " +
-           "WHERE sj.id.userId = :userId AND sj.id.jobId = :jobId")
-    boolean existsByUserIdAndJobId(@Param("userId") Long userId, @Param("jobId") Long jobId);
+
+    boolean existsByUserIdAndJobId(Long userId, Long jobId);
 }
