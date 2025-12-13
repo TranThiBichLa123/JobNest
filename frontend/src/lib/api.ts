@@ -59,8 +59,16 @@ export const candidateProfileApi = {
 export const applicationApi = {
   // Apply for a job
   applyForJob: async (jobId: number, data: ApplicationRequest): Promise<ApplicationResponse> => {
-    const response = await api.post(`/applications/apply/${jobId}`, data);
-    return response.data;
+    try {
+      const response = await api.post(`/applications/apply/${jobId}`, data);
+      return response.data;
+    } catch (error: any) {
+      // Hiển thị message lỗi rõ ràng khi bị 403 hoặc lỗi khác
+      if (error.response?.status === 403) {
+        throw new Error(error.response?.data?.message || "You are not allowed to apply for this job.");
+      }
+      throw error;
+    }
   },
 
   // Check if already applied
@@ -182,4 +190,11 @@ export const cvApi = {
     const response = await api.put(`/candidate/cvs/${cvId}/set-default`);
     return response.data;
   },
+};
+
+export const notificationApi = {
+  getMyNotifications: async () => {
+    const response = await api.get('/notifications/all');
+    return response.data;
+  }
 };

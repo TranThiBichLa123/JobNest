@@ -9,6 +9,7 @@ import com.jobnest.backend.repository.ApplicationRepository;
 import com.jobnest.backend.repository.CandidateProfileRepository;
 import com.jobnest.backend.repository.JobRepository;
 import com.jobnest.backend.service.ApplicationService;
+import com.jobnest.backend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +27,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final CandidateProfileRepository candidateProfileRepository;
-
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -55,6 +56,27 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.setStatus(Application.ApplicationStatus.PENDING);
 
         Application saved = applicationRepository.save(application);
+
+        // CREATE NOTIFICATION FOR EMPLOYER
+        Long employerId = job.getEmployer().getId();
+        notificationService.createNotification(
+            employerId,
+            "New CV Submitted",
+            "A new candidate has applied for your job: " + job.getTitle(),
+            "NEW_APPLICATION",
+            saved.getId()
+        );
+
+        // Notify candidate
+        notificationService.createNotification(
+            // Lấy đúng account của candidate profile
+            candidate.getUser(), // hoặc candidate.getAccount(), tuỳ entity của bạn
+            "Application Submitted",
+            "You have successfully applied for the position: " + job.getTitle(),
+            "APPLICATION_SUBMITTED",
+            saved.getId()
+        );
+
         return new ApplicationResponse(saved);
     }
 

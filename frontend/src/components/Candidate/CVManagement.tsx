@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { BiUpload, BiTrash, BiStar, BiCheckCircle } from "react-icons/bi";
 import { cvApi } from "@/lib/api";
 import { CandidateCV } from "@/types/cv";
+import axios from "axios";
 
 export default function CVManagement() {
   const [cvs, setCvs] = useState<CandidateCV[]>([]);
@@ -105,7 +106,11 @@ export default function CVManagement() {
       alert("CV deleted successfully!");
       loadCVs();
     } catch (error: any) {
-      alert(error.response?.data?.message || "Failed to delete CV");
+      if (axios.isAxiosError(error)) {
+        alert(error.response?.data?.message ?? "Once a CV has been submitted, it cannot be deleted.");
+      } else {
+        alert("Once a CV has been submitted, it cannot be deleted.");
+      }
     }
   };
 

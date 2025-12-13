@@ -58,6 +58,9 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/companies").hasRole("EMPLOYER")
                         .requestMatchers(HttpMethod.GET, "/api/companies/**").permitAll()
 
+                        // NOTIFICATION APIs
+                        .requestMatchers("/api/notifications/**").authenticated()
+
                         // OTHER
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()

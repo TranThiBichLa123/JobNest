@@ -15,7 +15,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     
     // Check if candidate already applied for a job
     boolean existsByJobIdAndCandidateId(Long jobId, Long candidateId);
-    
+    boolean existsByCvId(Long cvId);
     // Get all applications for a specific job
     Page<Application> findByJobId(Long jobId, Pageable pageable);
     

@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
-
     private final Account account;
     private Long candidateProfileId;
 
@@ -24,6 +23,11 @@ public class CustomUserDetails implements UserDetails {
 
     public Account getAccount() {
         return this.account;
+    }
+
+    public Long getId() {
+        // Trả về id của entity Account đang đăng nhập (chính là user hiện tại)
+        return this.account.getId();
     }
 
     public Long getCandidateProfileId() {

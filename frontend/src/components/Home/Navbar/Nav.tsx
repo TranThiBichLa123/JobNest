@@ -19,6 +19,7 @@ import LoginModal from "@/components/Auth/LoginModal";
 import GoogleRegisterButton from "@/components/Auth/GoogleRegisterButton";
 import { useAuthModal } from "@/context/AuthModalContext";
 import UserMenuDropdown from "./UserMenuDropdown";
+import { notificationApi } from "@/lib/api"; // Thêm dòng này nếu bạn đã có notificationApi
 
 // Helper function to generate avatar URL from email using UI Avatars
 function getAvatarUrl(avatarUrl: string | undefined, email: string | undefined, username: string | undefined): string {
@@ -87,7 +88,8 @@ const Nav = ({ openNav }: Props) => {
     }, []);
 
     // Always call the hook at the top level
-    useNotificationSocket(user?.id ? user.id.toString() : '', handleNotification);
+    // Sử dụng đúng channel: "/user/queue/notifications"
+    useNotificationSocket("/user/queue/notifications", handleNotification);
 
     useEffect(() => {
         // Cleanup toast timeout on unmount
@@ -105,6 +107,26 @@ const Nav = ({ openNav }: Props) => {
         window.addEventListener('scroll', handler)
         return () => window.removeEventListener('scroll', handler)
     }, [])
+
+    // Hàm load notification từ API khi bấm chuông
+    const loadNotifications = async () => {
+        try {
+            // Gọi API lấy notification (ví dụ: notificationApi.getMyNotifications())
+            const data = await notificationApi.getMyNotifications();
+            setNotifications(data);
+        } catch (error: any) {
+            // Xử lý lỗi nếu cần
+            setNotifications([]);
+        }
+    };
+
+    // Khi bấm chuông, vừa mở popup vừa load notification
+    const handleBellClick = () => {
+        setShowPopupLarge((prev) => !prev);
+        if (!showPopupLarge) {
+            loadNotifications();
+        }
+    };
 
     return (
         <div
@@ -162,10 +184,9 @@ const Nav = ({ openNav }: Props) => {
                         <button
                             className="relative p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-900 transition-all duration-300 mx-1"
                             aria-label="Notifications"
-                            onClick={() => setShowPopupLarge((prev) => !prev)}
+                            onClick={handleBellClick}
                         >
                             <FiBell className="w-7 h-7 text-cyan-700 dark:text-white" />
-                            {/* Notification dot (unread) */}
                             {notifications.length > 0 && (
                                 <span className="absolute top-1 right-1 block w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-800 animate-pulse"></span>
                             )}
@@ -179,7 +200,7 @@ const Nav = ({ openNav }: Props) => {
                                     {notifications.map((n, idx) => (
                                         <li key={idx} className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0 text-sm text-gray-700 dark:text-gray-200">
                                             {n.message}
-                                            <div className="text-xs text-gray-400 mt-1">{new Date(n.timestamp).toLocaleTimeString()}</div>
+                                            <div className="text-xs text-gray-400 mt-1">{new Date(n.createdAt).toLocaleTimeString()}</div>
                                         </li>
                                     ))}
                                 </ul>

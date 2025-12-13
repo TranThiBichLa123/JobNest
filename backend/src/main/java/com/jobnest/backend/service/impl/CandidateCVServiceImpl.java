@@ -3,6 +3,7 @@ package com.jobnest.backend.service.impl;
 import com.jobnest.backend.dto.request.CandidateCVRequest;
 import com.jobnest.backend.dto.response.CandidateCVResponse;
 import com.jobnest.backend.entities.CandidateCV;
+import com.jobnest.backend.repository.ApplicationRepository;
 import com.jobnest.backend.repository.CandidateCVRepository;
 import com.jobnest.backend.repository.CandidateProfileRepository;
 import com.jobnest.backend.service.CandidateCVService;
@@ -21,6 +22,9 @@ public class CandidateCVServiceImpl implements CandidateCVService {
 
     @Autowired
     private CandidateProfileRepository candidateProfileRepository;
+
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
     @Override
     @Transactional
@@ -97,17 +101,12 @@ public class CandidateCVServiceImpl implements CandidateCVService {
             throw new RuntimeException("Unauthorized access to CV");
         }
 
-        boolean wasDefault = cv.getIsDefault();
-        cvRepository.delete(cv);
-
-        // If deleted CV was default, set another one as default
-        if (wasDefault) {
-            List<CandidateCV> remainingCVs = cvRepository.findByCandidateIdOrderByCreatedAtDesc(candidateId);
-            if (!remainingCVs.isEmpty()) {
-                remainingCVs.get(0).setIsDefault(true);
-                cvRepository.save(remainingCVs.get(0));
-            }
+        boolean used = applicationRepository.existsByCvId(cvId);
+        if (used) {
+            throw new RuntimeException("CV has been used to apply job, cannot delete");
         }
+
+        cvRepository.delete(cv);
     }
 
     @Override
