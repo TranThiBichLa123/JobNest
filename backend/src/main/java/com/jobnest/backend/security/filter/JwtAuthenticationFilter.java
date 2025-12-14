@@ -30,56 +30,62 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         return
-        // AUTH & DOCS
-        path.startsWith("/api/auth/")
-                || path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs")
+            // AUTH (KHÔNG BAO GỒM /me)
+            path.equals("/api/auth/login")
+            || path.equals("/api/auth/register")
+            || path.equals("/api/auth/refresh")
+            || path.startsWith("/api/auth/google")
 
-                // PUBLIC JOB APIs
-                || path.startsWith("/api/jobs")
+            // DOCS
+            || path.startsWith("/swagger-ui")
+            || path.startsWith("/v3/api-docs")
 
-                // ✅ PUBLIC EMPLOYER JOB LIST
-                || path.matches("^/api/employers/\\d+/jobs$");
+            // PUBLIC APIs
+            || path.startsWith("/api/jobs")
+            || path.matches("^/api/employers/\\d+/jobs$");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+                                HttpServletResponse response,
+                                FilterChain filterChain)
+        throws ServletException, IOException {
 
-        String authorizationHeader = request.getHeader("Authorization");
+    String authHeader = request.getHeader("Authorization");
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String jwt = authorizationHeader.substring(7);
-
-            try {
-                String email = jwtUtil.extractEmail(jwt);
-
-                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
-
-                    if (jwtUtil.validateToken(jwt, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
-
-                        authToken.setDetails(
-                                new WebAuthenticationDetailsSource().buildDetails(request));
-
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    }
-                }
-
-            } catch (io.jsonwebtoken.ExpiredJwtException e) {
-                // ⛔ JWT hết hạn → trả 401 đúng chuẩn
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-        }
-
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
         filterChain.doFilter(request, response);
+        return;
     }
+
+    String token = authHeader.substring(7);
+
+    // Sử dụng validateToken(token, userDetails) đúng signature
+    String email = jwtUtil.extractEmail(token);
+
+    CustomUserDetails userDetails =
+            (CustomUserDetails) userDetailsService.loadUserByUsername(email);
+
+    if (!jwtUtil.validateToken(token, userDetails)) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+
+    UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
+
+    authentication.setDetails(
+            new WebAuthenticationDetailsSource().buildDetails(request)
+    );
+
+    // 🔥🔥🔥 DÒNG SỐNG CÒN
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    filterChain.doFilter(request, response);
+}
 
 }

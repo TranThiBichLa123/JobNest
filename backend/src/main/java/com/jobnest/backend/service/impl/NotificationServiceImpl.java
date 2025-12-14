@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -61,11 +62,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
     public void deleteNotification(Long notificationId, Long recipientId) {
         Notification notification = notificationRepository
                 .findByIdAndRecipientId(notificationId, recipientId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
-        notificationRepository.delete(notification);
+        notification.setDeletedAt(LocalDateTime.now());
+        notificationRepository.save(notification);
     }
 
     @Override

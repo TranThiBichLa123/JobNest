@@ -19,7 +19,9 @@ import LoginModal from "@/components/Auth/LoginModal";
 import GoogleRegisterButton from "@/components/Auth/GoogleRegisterButton";
 import { useAuthModal } from "@/context/AuthModalContext";
 import UserMenuDropdown from "./UserMenuDropdown";
+import NotificationDropdown from "./NotificationDropdown";
 import { notificationApi } from "@/lib/api"; // Thêm dòng này nếu bạn đã có notificationApi
+import LoginPopup from "./LoginPopup";
 
 // Helper function to generate avatar URL from email using UI Avatars
 function getAvatarUrl(avatarUrl: string | undefined, email: string | undefined, username: string | undefined): string {
@@ -62,6 +64,7 @@ const Nav = ({ openNav }: Props) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
     const [showToast, setShowToast] = useState(false);
     const toastTimeout = useRef<NodeJS.Timeout | null>(null);
     
@@ -72,9 +75,8 @@ const Nav = ({ openNav }: Props) => {
 
     // 🔥 LẤY USER TỪ AUTH CONTEXT
     const auth = useContext(AuthContext);
-    const user = auth?.user;   // user = currentUser
-
-
+    const user = auth?.user;
+    const isInitializing = auth?.isInitializing;
 
     // Notification handler
     const handleNotification = useCallback((msg: any) => {
@@ -109,19 +111,59 @@ const Nav = ({ openNav }: Props) => {
     }, [])
 
     // Hàm load notification từ API khi bấm chuông
-    const loadNotifications = async () => {
+    const loadNotifications = async (unreadOnly = false) => {
         try {
-            // Gọi API lấy notification (ví dụ: notificationApi.getMyNotifications())
-            const data = await notificationApi.getMyNotifications();
+            // Gọi API lấy notification, có thể truyền { unreadOnly: true } nếu muốn chỉ lấy chưa đọc
+            const data = await notificationApi.getMyNotifications({ unreadOnly });
             setNotifications(data);
+            // Đếm số lượng chưa đọc
+            setUnreadCount(Array.isArray(data) ? data.filter((n: any) => !n.read).length : 0);
         } catch (error: any) {
-            // Xử lý lỗi nếu cần
             setNotifications([]);
+            setUnreadCount(0);
         }
     };
 
-    // Khi bấm chuông, vừa mở popup vừa load notification
+    // Đánh dấu 1 thông báo là đã đọc
+    const handleMarkAsRead = async (notificationId: number) => {
+        try {
+            await notificationApi.markAsRead(notificationId);
+            setNotifications((prev) =>
+                prev.map((n) =>
+                    n.id === notificationId ? { ...n, read: true } : n
+                )
+            );
+            setUnreadCount((prev) => Math.max(0, prev - 1));
+        } catch {}
+    };
+
+    // Đánh dấu tất cả là đã đọc
+    const handleMarkAllAsRead = async () => {
+        try {
+            await notificationApi.markAllAsRead();
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+            setUnreadCount(0);
+        } catch {}
+    };
+
+    // Xóa tất cả thông báo
+    const handleClearAll = async () => {
+        try {
+            // Không còn deleteAllNotifications, chỉ xóa từng cái nếu cần
+            // Nếu backend không hỗ trợ xóa tất cả, bạn có thể lặp qua notifications và gọi deleteNotification từng cái:
+            await Promise.all(notifications.map((n: any) => notificationApi.deleteNotification(n.id)));
+            setNotifications([]);
+            setUnreadCount(0);
+        } catch {}
+    };
+
+    // Khi bấm chuông, nếu chưa đăng nhập thì nhắc nhở đăng nhập, nếu đã đăng nhập thì mở popup và load notification
     const handleBellClick = () => {
+        if (isInitializing) return null; // Đợi context khởi tạo xong mới check user
+        if (!user) {
+            openLoginModal();
+            return;
+        }
         setShowPopupLarge((prev) => !prev);
         if (!showPopupLarge) {
             loadNotifications();
@@ -179,37 +221,33 @@ const Nav = ({ openNav }: Props) => {
                             Job Post
                         </button>
 
-                        {/* Notification Bell */}
-
-                        <button
-                            className="relative p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-900 transition-all duration-300 mx-1"
-                            aria-label="Notifications"
-                            onClick={handleBellClick}
-                        >
-                            <FiBell className="w-7 h-7 text-cyan-700 dark:text-white" />
-                            {notifications.length > 0 && (
-                                <span className="absolute top-1 right-1 block w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-800 animate-pulse"></span>
-                            )}
-                        </button>
+                        {/* Notification Bell: chỉ hiển thị khi đã đăng nhập */}
+                        {user && (
+                            <button
+                                className="relative p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-900 transition-all duration-300 mx-1"
+                                aria-label="Notifications"
+                                onClick={handleBellClick}
+                            >
+                                <FiBell className="w-7 h-7 text-cyan-700 dark:text-white" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-1 right-1 block w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-800 animate-pulse"></span>
+                                )}
+                            </button>
+                        )}
 
                         {/* Notification Popup */}
-                        {showPopupLarge && notifications.length > 0 && (
-                            <div className="absolute right-0 top-12 z-[20000] w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-                                <div className="p-4 border-b border-gray-100 dark:border-gray-700 font-semibold text-cyan-700 dark:text-cyan-200">Notifications</div>
-                                <ul className="max-h-72 overflow-y-auto">
-                                    {notifications.map((n, idx) => (
-                                        <li key={idx} className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0 text-sm text-gray-700 dark:text-gray-200">
-                                            {n.message}
-                                            <div className="text-xs text-gray-400 mt-1">{new Date(n.createdAt).toLocaleTimeString()}</div>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <button className="w-full py-2 text-xs text-gray-500 hover:text-cyan-700 dark:hover:text-cyan-200" onClick={() => setNotifications([])}>Clear all</button>
-                            </div>
+                        {user && showPopupLarge && (
+                            <NotificationDropdown
+                                notifications={notifications}
+                                unreadCount={unreadCount}
+                                onMarkAllAsRead={handleMarkAllAsRead}
+                                onClearAll={handleClearAll}
+                                onMarkAsRead={handleMarkAsRead}
+                            />
                         )}
 
                         {/* Toast Notification */}
-                        {showToast && notifications.length > 0 && (
+                        {user && showToast && notifications.length > 0 && (
                             <div className="fixed bottom-8 right-8 z-[30000] bg-cyan-700 text-white px-6 py-3 rounded-lg shadow-lg animate-fade-in-up">
                                 <span className="font-semibold">Notification:</span> {notifications[0].message}
                             </div>
@@ -241,61 +279,12 @@ const Nav = ({ openNav }: Props) => {
                         />
 
                         {/* ---- POPUP đầu tiên ---- */}
-                        {showPopupSmall && (
-                            <div
-                                className="absolute top-full right-0 mt-2 z-[20000]">
-                                <div
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="relative bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-[350px]"
-                                >
-                                    <h2 className="text-lg font-semibold mb-4 text-center">Job seeker login</h2>
-
-                                    <div className="mb-4">
-                                        <GoogleRegisterButton 
-                                            role="CANDIDATE"
-                                            fullWidth={true}
-                                            onSuccess={(data) => {
-                                                setShowPopup(false);
-                                                // User is now logged in, state will persist
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <button
-                                            onClick={() => {
-                                                setShowPopup(false);
-                                                openLoginModal();
-                                            }}
-                                            className="w-full border py-2 rounded flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700">
-                                            <span>Login</span>
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowPopup(false);
-                                                openRegisterModal();
-                                            }}
-                                            className="w-full border py-2 rounded flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
-                                        >
-                                            <span>Create new account</span>
-                                        </button>
-
-                                    </div>
-
-                                    {/* Close button */}
-                                    <button
-                                        onClick={() => setShowPopup(false)}
-                                        className="absolute top-2 right-3 text-gray-500 hover:text-black dark:hover:text-white"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-
-
-
+                        <LoginPopup
+                            show={showPopupSmall}
+                            onClose={() => setShowPopup(false)}
+                            onOpenLogin={openLoginModal}
+                            onOpenRegister={openRegisterModal}
+                        />
 
                     </div>
                 )}

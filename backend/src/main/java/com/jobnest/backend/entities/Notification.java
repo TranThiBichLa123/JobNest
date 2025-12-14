@@ -2,10 +2,12 @@ package com.jobnest.backend.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Where;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
+@Where(clause = "deleted_at IS NULL")
 @Data
 public class Notification {
 
@@ -35,6 +37,9 @@ public class Notification {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     public enum NotificationType {
         NEW_APPLICATION,

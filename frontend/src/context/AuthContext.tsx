@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useRef } from "react";
 import api from "@/lib/axios";
 import { User, LoginRequest, RegisterRequest, AuthResponse } from "@/types/user";
 
@@ -13,6 +13,8 @@ interface AuthContextType {
   setUser: (user: User | null) => void;
   reloadUser: () => Promise<void>;
   isLoading: boolean;
+  accessToken: string | null;
+  isInitializing: boolean;
 }
 
 // Context
@@ -20,13 +22,16 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export default function AuthProvider({ children }: any) {
   const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const hasFetchedMe = useRef(false);
 
   // Attach token to axios headers
-  const attachToken = () => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  const attachToken = (token?: string | null) => {
+    const t = token ?? accessToken ?? localStorage.getItem("accessToken");
+    if (t) {
+      api.defaults.headers.common["Authorization"] = `Bearer ${t}`;
     }
   };
 
@@ -37,34 +42,32 @@ export default function AuthProvider({ children }: any) {
     localStorage.setItem("accessToken", res.data.accessToken);
     localStorage.setItem("refreshToken", res.data.refreshToken);
 
-    attachToken();
+    setAccessToken(res.data.accessToken);
+    attachToken(res.data.accessToken);
     setUser(res.data.account);
   }
 
   // Logout function
   async function logout() {
     const refreshTok = localStorage.getItem("refreshToken");
-    
     try {
       await api.post("/auth/logout", { refreshToken: refreshTok });
     } catch (error: any) {
-      // Silently ignore 403/401 errors - logout should succeed locally even if server rejects it
       if (error?.response?.status !== 403 && error?.response?.status !== 401) {
         console.error("Logout error:", error);
       }
     }
-
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     delete api.defaults.headers.common["Authorization"];
     setUser(null);
+    setAccessToken(null);
   }
 
   // Register function
   async function register(data: RegisterRequest) {
     await api.post("/auth/register", data);
     // Registration successful - user needs to verify email before logging in
-    // Do NOT store tokens or set user
   }
 
   // Refresh token function
@@ -74,11 +77,10 @@ export default function AuthProvider({ children }: any) {
 
     try {
       const res = await api.post<AuthResponse>("/auth/refresh", { refreshToken: refreshTok });
-      
       localStorage.setItem("accessToken", res.data.accessToken);
       localStorage.setItem("refreshToken", res.data.refreshToken);
-      
-      attachToken();
+      setAccessToken(res.data.accessToken);
+      attachToken(res.data.accessToken);
       setUser(res.data.account);
     } catch (error) {
       console.error("Refresh token failed:", error);
@@ -90,9 +92,7 @@ export default function AuthProvider({ children }: any) {
   async function reloadUser() {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
-
-    attachToken();
-    
+    attachToken(token);
     try {
       const res = await api.get<User>("/auth/me");
       setUser(res.data);
@@ -101,56 +101,54 @@ export default function AuthProvider({ children }: any) {
     }
   }
 
-  // Load user on mount
-  async function loadUser() {
-    const token = localStorage.getItem("accessToken");
-    const refreshTok = localStorage.getItem("refreshToken");
-    
-    console.log("🔍 Loading user... AccessToken exists:", !!token, "RefreshToken exists:", !!refreshTok);
-    
-    if (token) {
-      attachToken();
-
-      try {
-        console.log("📡 Fetching user from /auth/me...");
-        const res = await api.get<User>("/auth/me");
-        console.log("✅ User loaded successfully:", res.data);
-        setUser(res.data);
-      } catch (error: any) {
-        console.log("❌ Failed to fetch user, status:", error.response?.status);
-        
-        // Try to refresh token if we have one
-        if (refreshTok) {
-          try {
-            console.log("🔄 Attempting to refresh token...");
-            await refreshToken();
-            console.log("✅ Token refreshed successfully");
-          } catch (refreshError) {
-            console.error("❌ Refresh failed, clearing tokens");
-            // Refresh failed, clear tokens
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            delete api.defaults.headers.common["Authorization"];
-          }
-        } else {
-          console.log("⚠️ No refresh token, clearing access token");
-          // No refresh token, clear access token
-          localStorage.removeItem("accessToken");
-          delete api.defaults.headers.common["Authorization"];
-        }
-      }
-    } else {
-      console.log("ℹ️ No access token found, user not logged in");
-    }
-    setIsLoading(false);
-  }
-
+  // Restore session when app mount
   useEffect(() => {
-    loadUser();
+    if (hasFetchedMe.current) return;
+    hasFetchedMe.current = true;
+
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      setUser(null);
+      setIsInitializing(false);
+      setIsLoading(false);
+      return;
+    }
+
+    // Đảm bảo attachToken(token) được gọi TRƯỚC khi gọi api.get("/auth/me")
+    attachToken(token);
+
+    setAccessToken(token);
+
+    api
+      .get("/auth/me")
+      .then(res => {
+        setUser(res.data);
+      })
+      .catch(() => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        setUser(null);
+      })
+      .finally(() => {
+        setIsInitializing(false);
+        setIsLoading(false);
+      });
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, refreshToken, setUser, reloadUser, isLoading }}>
+    <AuthContext.Provider value={{
+      user,
+      login,
+      logout,
+      register,
+      refreshToken,
+      setUser,
+      reloadUser,
+      isLoading,
+      accessToken,
+      isInitializing
+    }}>
       {children}
     </AuthContext.Provider>
   );

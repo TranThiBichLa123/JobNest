@@ -2,30 +2,25 @@ import axios from "axios";
 import { API_URL } from "./config";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || API_URL,
+  baseURL: API_URL,
   withCredentials: true,
 });
 
-// Request interceptor to add JWT token to every request
+/**
+ * ✅ REQUEST INTERCEPTOR – LUÔN GẮN TOKEN
+ */
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      // Ensure headers object exists (some axios versions may set it as undefined initially)
-      // Use AxiosRequestHeaders type and set method if available
-      if (config.headers && typeof config.headers.set === "function") {
-        config.headers.set("Authorization", `Bearer ${token}`);
-      } else {
-        (config.headers as any)["Authorization"] = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${token}`;
       }
-      // Optional debug log to help diagnose header forwarding
-      // console.debug("Axios: Adding Authorization header", { url: config.url });
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor for automatic token refresh

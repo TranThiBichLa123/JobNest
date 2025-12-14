@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -38,19 +39,25 @@ public class WebSecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
                         // ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // AUTH
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(
+                            "/api/auth/login",
+                            "/api/auth/register",
+                            "/api/auth/refresh",
+                            "/api/auth/google/**"
+                        ).permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         // PUBLIC JOB APIs (CANDIDATE)
                         .requestMatchers(HttpMethod.GET, "/api/jobs/**").permitAll()
 
-                        // EMPLOYER JOB APIs  THÊM DÒNG NÀY
+                        // EMPLOYER JOB APIs
                         .requestMatchers(HttpMethod.GET, "/api/employers/*/jobs").permitAll()
                         .requestMatchers("/api/employers/**").hasRole("EMPLOYER")
 
@@ -67,7 +74,9 @@ public class WebSecurityConfig {
 
                         .anyRequest().authenticated())
 
+                // 🔥🔥🔥 DÒNG QUYẾT ĐỊNH
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 

@@ -5,7 +5,9 @@ import com.jobnest.backend.entities.Notification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -25,4 +27,14 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     void markAllAsReadByRecipientId(Long recipientId);
 
     java.util.List<Notification> findByRecipient(Account recipient);
+
+    @Modifying
+    @Transactional
+    @Query("""
+       update Notification n
+       set n.deletedAt = CURRENT_TIMESTAMP
+       where n.recipient.id = :userId
+         and n.deletedAt IS NULL
+    """)
+    void clearAllByUser(@Param("userId") Long userId);
 }

@@ -193,8 +193,18 @@ export const cvApi = {
 };
 
 export const notificationApi = {
-  getMyNotifications: async () => {
-    const response = await api.get('/notifications/all');
+  // Lấy tất cả thông báo (có thể phân trang, lọc read/unread nếu backend hỗ trợ)
+  getMyNotifications: async (params?: { page?: number; size?: number; unreadOnly?: boolean }) => {
+    const response = await api.get('/notifications/all', { params });
     return response.data;
-  }
+  },
+
+  // Đánh dấu 1 thông báo là đã đọc
+  markAsRead: (id: number) => api.post(`/notifications/${id}/read`),
+
+  // Đánh dấu tất cả thông báo là đã đọc
+  markAllAsRead: () => api.post(`/notifications/read-all`),
+
+  // Xóa 1 thông báo
+  deleteNotification: (id: number) => api.delete(`/notifications/${id}`),
 };
