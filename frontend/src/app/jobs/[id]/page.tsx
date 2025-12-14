@@ -22,6 +22,7 @@ export default function JobDetailPage() {
   const { openLoginModal } = useAuthModal();
   
   const [hasApplied, setHasApplied] = useState(false);
+  const [appliedStatus, setAppliedStatus] = useState<string | null>(null); // track status
   const [isSaved, setIsSaved] = useState(false);
 
   const { data: job, loading } = useFetch<Job>(`${server}/api/jobs/${jobId}`);
@@ -42,14 +43,17 @@ export default function JobDetailPage() {
   useEffect(() => {
     if (auth?.user && jobId) {
       applicationApi.checkIfApplied(Number(jobId))
-        .then(res => setHasApplied(res.hasApplied))
+        .then((res: any) => {
+          setHasApplied(res.hasApplied);
+          setAppliedStatus(res.status || null); // status may be undefined
+        })
         .catch((error) => {
           // Silently ignore auth errors
           if (error.response?.status !== 401 && error.response?.status !== 403) {
             console.error('Error checking applied status:', error);
           }
         });
-        
+
       savedJobApi.checkIfSaved(Number(jobId))
         .then(res => setIsSaved(res.isSaved))
         .catch((error) => {
@@ -79,6 +83,47 @@ export default function JobDetailPage() {
       console.error("Error saving job:", error);
       alert(error.response?.data?.message || "Failed to save job");
     }
+  };
+
+  // Helper for Apply button logic
+  const renderApplyButton = () => {
+    if (appliedStatus === "WITHDRAWN") {
+      return (
+        <Link
+          href={auth?.user ? `/jobs/${jobId}/apply` : "#"}
+          onClick={(e) => {
+            if (!auth?.user) {
+              e.preventDefault();
+              openLoginModal();
+            }
+          }}
+          className="block w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
+        >
+          Apply Again
+        </Link>
+      );
+    }
+    if (hasApplied) {
+      return (
+        <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-6 py-3 rounded-lg font-semibold text-center">
+          ✓ Already Applied
+        </div>
+      );
+    }
+    return (
+      <Link
+        href={auth?.user ? `/jobs/${jobId}/apply` : "#"}
+        onClick={(e) => {
+          if (!auth?.user) {
+            e.preventDefault();
+            openLoginModal();
+          }
+        }}
+        className="block w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
+      >
+        Apply Now
+      </Link>
+    );
   };
 
   if (loading) {
@@ -257,24 +302,7 @@ export default function JobDetailPage() {
             {/* Apply Card */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sticky top-24">
               <div className="text-center">
-                {hasApplied ? (
-                  <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-6 py-3 rounded-lg font-semibold">
-                    ✓ Already Applied
-                  </div>
-                ) : (
-                  <Link
-                    href={auth?.user ? `/jobs/${jobId}/apply` : "#"}
-                    onClick={(e) => {
-                      if (!auth?.user) {
-                        e.preventDefault();
-                        openLoginModal();
-                      }
-                    }}
-                    className="block w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
-                  >
-                    Apply Now
-                  </Link>
-                )}
+                {renderApplyButton()}
               </div>
 
               {/* Job Meta */}

@@ -243,6 +243,7 @@ const Nav = ({ openNav }: Props) => {
                                 onMarkAllAsRead={handleMarkAllAsRead}
                                 onClearAll={handleClearAll}
                                 onMarkAsRead={handleMarkAsRead}
+                                onClose={() => setShowPopupLarge(false)}
                             />
                         )}
 

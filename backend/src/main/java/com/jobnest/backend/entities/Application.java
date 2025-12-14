@@ -52,7 +52,8 @@ public class Application {
         REVIEWED,
         SHORTLISTED,
         REJECTED,
-        ACCEPTED
+        ACCEPTED,
+        WITHDRAWN 
     }
 
     @PrePersist

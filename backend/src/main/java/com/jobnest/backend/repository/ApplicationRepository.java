@@ -56,4 +56,17 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
             @Param("candidateId") Long candidateId,
             Pageable pageable
     );
+
+    // Lấy application mới nhất của candidate cho job (dùng để kiểm tra apply lại)
+    Optional<Application> findTopByJobIdAndCandidateIdOrderByAppliedAtDesc(
+        Long jobId,
+        Long candidateId
+    );
+
+    // Check if candidate already applied for a job with specific statuses
+    boolean existsByJobIdAndCandidateIdAndStatusIn(
+        Long jobId,
+        Long candidateId,
+        Iterable<Application.ApplicationStatus> statuses
+    );
 }

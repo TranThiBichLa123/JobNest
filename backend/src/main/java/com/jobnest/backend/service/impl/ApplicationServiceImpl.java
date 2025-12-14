@@ -17,8 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +36,17 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public ApplicationResponse applyForJob(Long jobId, Long candidateId, ApplicationRequest request) {
-        // Check if already applied
-        if (applicationRepository.existsByJobIdAndCandidateId(jobId, candidateId)) {
-            throw new RuntimeException("You have already applied for this job");
+        // 🔥 CHỈ CHO APPLY LẠI NẾU ĐƠN GẦN NHẤT ĐÃ RÚT (WITHDRAWN)
+        Optional<Application> latestApp =
+            applicationRepository.findTopByJobIdAndCandidateIdOrderByAppliedAtDesc(jobId, candidateId);
+
+        if (latestApp.isPresent()) {
+            Application app = latestApp.get();
+            if (!app.getStatus().equals(Application.ApplicationStatus.WITHDRAWN)) {
+                throw new RuntimeException(
+                    "You have already applied for this job and cannot apply again."
+                );
+            }
         }
 
         // Get job
@@ -54,6 +65,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.setCoverLetter(request.getCoverLetter());
         application.setResumeUrl(request.getResumeUrl());
         application.setStatus(Application.ApplicationStatus.PENDING);
+        application.setAppliedAt(LocalDateTime.now());
 
         Application saved = applicationRepository.save(application);
 
@@ -82,7 +94,16 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public boolean hasApplied(Long jobId, Long candidateId) {
-        return applicationRepository.existsByJobIdAndCandidateId(jobId, candidateId);
+        return applicationRepository.existsByJobIdAndCandidateIdAndStatusIn(
+            jobId,
+            candidateId,
+            List.of(
+                Application.ApplicationStatus.PENDING,
+                Application.ApplicationStatus.REVIEWED,
+                Application.ApplicationStatus.SHORTLISTED,
+                Application.ApplicationStatus.ACCEPTED
+            )
+        );
     }
 
     @Override
@@ -133,15 +154,25 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public void withdrawApplication(Long applicationId, Long candidateId) {
-        Application application = applicationRepository.findById(applicationId)
+        Application app = applicationRepository.findById(applicationId)
             .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        // Verify ownership
-        if (!application.getCandidate().getId().equals(candidateId)) {
-            throw new RuntimeException("You are not authorized to withdraw this application");
+        //  Không cho rút đơn của người khác
+        if (!app.getCandidate().getId().equals(candidateId)) {
+            throw new AccessDeniedException("Not your application");
         }
 
-        applicationRepository.delete(application);
+        //  CHẶN RÚT KHI ĐÃ ĐƯỢC XỬ LÝ
+        if (!app.getStatus().equals(Application.ApplicationStatus.PENDING)) {
+            throw new IllegalStateException(
+                "Only pending applications can be withdrawn"
+            );
+        }
+
+        //  RÚT MỀM (soft delete)
+        app.setStatus(Application.ApplicationStatus.WITHDRAWN);
+        app.setReviewedAt(LocalDateTime.now());
+        applicationRepository.save(app);
     }
 
     @Override

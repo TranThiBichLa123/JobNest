@@ -2,8 +2,10 @@ package com.jobnest.backend.controllers;
 
 import com.jobnest.backend.dto.request.ApplicationRequest;
 import com.jobnest.backend.dto.response.ApplicationResponse;
+import com.jobnest.backend.entities.Application;
 import com.jobnest.backend.security.user.CustomUserDetails;
 import com.jobnest.backend.service.ApplicationService;
+import com.jobnest.backend.repository.ApplicationRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -23,6 +26,7 @@ import java.util.Map;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+    private final ApplicationRepository applicationRepository; // Inject repository directly
 
     @PostMapping("/apply/{jobId}")
     public ResponseEntity<ApplicationResponse> applyForJob(
@@ -40,15 +44,28 @@ public class ApplicationController {
     }
 
     @GetMapping("/check/{jobId}")
-    public ResponseEntity<Map<String, Boolean>> checkIfApplied(
+    public ResponseEntity<Map<String, Object>> checkIfApplied(
             @PathVariable Long jobId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        
+
         Long candidateId = userDetails.getCandidateProfileId();
-        boolean hasApplied = candidateId != null && 
-                           applicationService.hasApplied(jobId, candidateId);
-        
-        return ResponseEntity.ok(Map.of("hasApplied", hasApplied));
+        boolean hasApplied = candidateId != null &&
+                applicationService.hasApplied(jobId, candidateId);
+
+        // Lấy status của application mới nhất (nếu có)
+        Optional<Application> latest =
+            candidateId != null
+                ? applicationRepository.findTopByJobIdAndCandidateIdOrderByAppliedAtDesc(jobId, candidateId)
+                : Optional.empty();
+
+        String status = latest.map(a -> a.getStatus().name()).orElse(null);
+
+        return ResponseEntity.ok(
+            Map.of(
+                "hasApplied", hasApplied,
+                "status", status
+            )
+        );
     }
 
     @GetMapping("/my-applications")

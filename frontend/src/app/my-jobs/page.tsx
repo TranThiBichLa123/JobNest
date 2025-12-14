@@ -42,6 +42,7 @@ const getStatusColor = (status: string) => {
     'SHORTLISTED': 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
     'ACCEPTED': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
     'REJECTED': 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+    'WITHDRAWN': 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300', // add gray for withdrawn
   };
   return colors[status] || colors['PENDING'];
 };
@@ -331,14 +332,24 @@ export default function MyJobsPage() {
                                     Applied {formatDate(app.appliedAt)}
                                   </span>
                                 </div>
+                                {/* Show withdrawn info if status is WITHDRAWN */}
+                                {app.status === "WITHDRAWN" && (
+                                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 italic">
+                                    You withdrew this application on {formatDate(app.updatedAt || app.withdrawnAt || app.appliedAt)}
+                                  </div>
+                                )}
                               </div>
-                              <button
-                                onClick={() => handleWithdrawApplication(app.id)}
-                                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                title="Withdraw Application"
-                              >
-                                <BiTrash className="text-xl" />
-                              </button>
+                              {/* Only show withdraw button if status is PENDING */}
+                              {app.status === "PENDING" && (
+                                <button
+                                  onClick={() => handleWithdrawApplication(app.id)}
+                                  className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                  title="You can only withdraw applications that are still pending."
+                                >
+                                  <BiTrash className="text-xl" />
+                                </button>
+                              )}
+                              {/* No button for WITHDRAWN or other statuses */}
                             </div>
 
                             {app.coverLetter && (
