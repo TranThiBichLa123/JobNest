@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { UserIcon, BriefcaseIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { UserIcon, BriefcaseIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 import { AuthContext } from "@/context/AuthContext";
 
 interface UserMenuDropdownProps {
@@ -80,20 +80,6 @@ export default function UserMenuDropdown({ avatarUrl, username }: UserMenuDropdo
               <BriefcaseIcon className="w-5 h-5" />
               My Jobs
             </li>
-
-            {/* Admin Panel (only for admins) */}
-            {auth?.user?.role === 'ADMIN' && (
-              <li
-                onClick={() => {
-                  router.push("/admin");
-                  setOpen(false);
-                }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-blue-600 dark:text-blue-400 transition-colors border-t border-gray-200 dark:border-gray-700"
-              >
-                <Cog6ToothIcon className="w-5 h-5" />
-                Admin Panel
-              </li>
-            )}
 
             {/* Logout */}
             <li
